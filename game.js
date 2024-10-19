@@ -1,353 +1,249 @@
-var xFields = 59;
-var yFields = 59;
-var fields = 59;
-
-var mid = {
-  x: (xFields - 1) / 2,
-  y: (yFields - 1) / 2,
+// Heorhi Davydau
+const xFields = 59;
+const yFields = 59;
+const fields = 59;
+const mid = {
+  x: Math.floor(xFields / 2),
+  y: Math.floor(yFields / 2),
 };
-
-function initGameField() {
-  var gameDiv = document.getElementById('game');
-  var table = document.createElement('table');
-  gameDiv.appendChild(table);
-  var tableBody = document.createElement('tbody');
-  table.appendChild(tableBody);
-  for (var y = 0; y < yFields; y++) {
-    var tr = document.createElement('tr');
-    tr.className = 'y-' + y;
-    for (var x = 0; x < xFields; x++) {
-      var td = document.createElement('td');
-      td.className = 'y-' + y + ' x-' + x;
-      tr.appendChild(td);
-    }
-    tableBody.appendChild(tr);
-  }
-}
-
-initGameField();
-
-var xShip = mid.x;
-var yShip = mid.y;
-var rShip = 0;
-var shipCenter = [
-  [xShip - 1, yShip - 1],
-  [xShip, yShip - 1],
-  [xShip + 1, yShip - 1],
-  [xShip - 1, yShip],
-  [xShip, yShip],
-  [xShip + 1, yShip],
-  [xShip - 1, yShip + 1],
-  [xShip, yShip + 1],
-  [xShip + 1, yShip + 1],
-];
-
-// north: south: west: east: nw: ne: sw: se:
-//  X             X     X    X X X X X     X
-// XXX    XXX    XX     XX    X   X   X   X
-//         X      X     X    X     X X X X X
-var shipRotations = [
-  { points: [3, 4, 5], rpg: 1 }, // 0 north
-  { points: [0, 4, 8], rpg: 2 }, // 1 north-east
-  { points: [1, 4, 7], rpg: 5 }, // 2 east
-  { points: [2, 4, 6], rpg: 8 }, // 3 south-east
-  { points: [3, 4, 5], rpg: 7 }, // 4 south
-  { points: [0, 4, 8], rpg: 6 }, // 5 south-west
-  { points: [1, 4, 7], rpg: 3 }, // 6 west
-  { points: [2, 4, 6], rpg: 0 }, // 7 north-west
-];
-
-function displayPoint(x, y, color) {
-  var point = document.querySelector('.y-' + y + '.x-' + x);
-  if (point !== null) point.style.background = color;
-  else console.error('invalid point [' + x + ',' + y + ']');
-}
-
-function deletePoint(x, y) {
-  displayPoint(x, y, 'white');
-}
-
-function deleteShip() {
-  var pointsToBeDeleted = shipRotations[rShip].points.concat([
-    shipRotations[rShip].rpg,
-  ]);
-  pointsToBeDeleted.forEach((point) => {
-    var tmpX = shipCenter[point][0];
-    var tmpY = shipCenter[point][1];
-    deletePoint(tmpX, tmpY);
-  });
-}
-
-function displayShip() {
-  shipRotations[rShip].points.forEach((point) => {
-    var tmpX = shipCenter[point][0];
-    var tmpY = shipCenter[point][1];
-    displayPoint(tmpX, tmpY, 'black');
-  });
-  var point = shipRotations[rShip].rpg;
-  var tmpX = shipCenter[point][0];
-  var tmpY = shipCenter[point][1];
-  displayPoint(tmpX, tmpY, 'red');
-}
-
-function rotateShip(rotation) {
-  // delete old ship points
-  deleteShip();
-
-  // calculate new ship points
-  if (rotation > 0) rShip = (rShip + 1) % 8;
-  else if (rotation < 0) {
-    if (rShip === 0) rShip = 7;
-    else rShip = rShip - 1;
-  }
-
-  // render new ship
-  displayShip();
-}
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-var missiles = [];
-function addMissile() {
-  var rand = random(0, 7);
-  // 7 0 1
-  // 6   2
-  // 5 4 3
-  if (rand === 0) missiles.push({ x: mid.x, y: 0 });
-  else if (rand === 1) missiles.push({ x: xFields - 1, y: 0 });
-  else if (rand === 2) missiles.push({ x: xFields - 1, y: mid.y });
-  else if (rand === 3) missiles.push({ x: xFields - 1, y: yFields - 1 });
-  else if (rand === 4) missiles.push({ x: mid.x, y: yFields - 1 });
-  else if (rand === 5) missiles.push({ x: 0, y: yFields - 1 });
-  else if (rand === 6) missiles.push({ x: 0, y: mid.y });
-  else if (rand === 7) missiles.push({ x: 0, y: 0 });
-}
-
-function deleteMissiles() {
-  missiles.forEach((missile) => {
-    deletePoint(missile.x, missile.y);
-  });
-}
-
-function displayMissiles() {
-  missiles.forEach((missile) => {
-    displayPoint(missile.x, missile.y, 'green');
-  });
-}
-
-function moveMissiles() {
-  // delete old missile points
-  deleteMissiles();
-
-  // calculate new possitions
-  missiles = missiles.map((missile) => {
-    var m = (missile.y - mid.y) / (missile.x - mid.x);
-    var b = missile.y - m * missile.x;
-
-    if (missile.x === mid.x) {
-      if (missile.y > mid.y) return { x: missile.x, y: missile.y - 1 };
-      else return { x: missile.x, y: missile.y + 1 };
-    } else if (missile.y === mid.y) {
-      if (missile.x < mid.x) return { x: missile.x + 1, y: missile.y };
-      else return { x: missile.x - 1, y: missile.y };
-    } else {
-      let retX = missile.x;
-      let retY = missile.y;
-      if (missile.y < mid.y) retY++;
-      else retY--;
-      if (missile.x < mid.x) retX++;
-      else retX--;
-      return { x: retX, y: retY };
-    }
-  });
-
-  if (collision()) {
-    endGame();
+export class Game {
+  constructor(ws) {
+    this.ws = ws;
+    this.xShip = mid.x;
+    this.yShip = mid.y;
+    this.rShip = 0;
+    this.missiles = [];
+    this.lasers = [];
+    this.counter = 0;
+    this.ival = null;
+    this.score = 0;
+    this.speed = 1000;
   }
 
-  // displayMissiles
-  displayMissiles();
-}
-
-displayShip();
-
-function collision() {
-  for (var i = 0; i < missiles.length; i++) {
-    var missile = missiles[i];
-    if (
-      missile.x === mid.x + 1 ||
-      missile.x === mid.x - 1 ||
-      missile.y === mid.y + 1 ||
-      missile.y === mid.y - 1
-    ) {
-      return true;
+  rotateShip(rotation) {
+    // calculate new ship points
+    if (rotation > 0) this.rShip = (this.rShip + 1) % 8;
+    else if (rotation < 0) {
+      if (this.rShip === 0) this.rShip = 7;
+      else this.rShip = this.rShip - 1;
     }
-  }
-  return false;
-}
 
-let lasers = [];
-function addLaser() {
-  // 7 0 1
-  // 6   2
-  // 5 4 3
-  let retObj = { x: mid.x, y: mid.y, r: rShip };
-
-  if (rShip === 0) {
-    retObj.y = mid.y - 2;
-  } else if (rShip === 1) {
-    retObj.x = mid.x + 2;
-    retObj.y = mid.y - 2;
-  } else if (rShip === 2) {
-    retObj.x = mid.x + 2;
-  } else if (rShip === 3) {
-    retObj.x = mid.x + 2;
-    retObj.y = mid.y + 2;
-  } else if (rShip === 4) {
-    retObj.y = mid.y + 2;
-  } else if (rShip === 5) {
-    retObj.x = mid.x - 2;
-    retObj.y = mid.y + 2;
-  } else if (rShip === 6) {
-    retObj.x = mid.x - 2;
-  } else if (rShip === 7) {
-    retObj.x = mid.x - 2;
-    retObj.y = mid.y - 2;
+    // render new ship
+    this.sendGameState();
   }
 
-  lasers.push(retObj);
-}
+  addMissile() {
+    const rand = random(0, 7);
+    // 7 0 1
+    // 6   2
+    // 5 4 3
+    if (rand === 0) this.missiles.push({ x: mid.x, y: 0 });
+    else if (rand === 1) this.missiles.push({ x: xFields - 1, y: 0 });
+    else if (rand === 2) this.missiles.push({ x: xFields - 1, y: mid.y });
+    else if (rand === 3) this.missiles.push({ x: xFields - 1, y: yFields - 1 });
+    else if (rand === 4) this.missiles.push({ x: mid.x, y: yFields - 1 });
+    else if (rand === 5) this.missiles.push({ x: 0, y: yFields - 1 });
+    else if (rand === 6) this.missiles.push({ x: 0, y: mid.y });
+    else if (rand === 7) this.missiles.push({ x: 0, y: 0 });
+  }
 
-function displayLasers() {
-  lasers.forEach((laser) => {
-    displayPoint(laser.x, laser.y, 'blue');
-  });
-}
+  moveMissiles() {
+    this.missiles = this.missiles.map((missile) => {
+      const m = (missile.y - mid.y) / (missile.x - mid.x);
+      const b = missile.y - m * missile.x;
 
-function moveLasers() {
-  // delete old lasers
-  lasers.forEach((laser) => {
-    displayPoint(laser.x, laser.y, 'white');
-  });
+      if (missile.x === mid.x) {
+        if (missile.y > mid.y) return { x: missile.x, y: missile.y - 1 };
+        else return { x: missile.x, y: missile.y + 1 };
+      } else if (missile.y === mid.y) {
+        if (missile.x < mid.x) return { x: missile.x + 1, y: missile.y };
+        else return { x: missile.x - 1, y: missile.y };
+      } else {
+        let retX = missile.x;
+        let retY = missile.y;
+        if (missile.y < mid.y) retY++;
+        else retY--;
+        if (missile.x < mid.x) retX++;
+        else retX--;
+        return { x: retX, y: retY };
+      }
+    });
 
-  // move lasers
-  lasers = lasers.map((laser) => {
-    if (laser.r === 0) {
-      laser.y--;
-    } else if (laser.r === 1) {
-      laser.x++;
-      laser.y--;
-    } else if (laser.r === 2) {
-      laser.x++;
-    } else if (laser.r === 3) {
-      laser.x++;
-      laser.y++;
-    } else if (laser.r === 4) {
-      laser.y++;
-    } else if (laser.r === 5) {
-      laser.x--;
-      laser.y++;
-    } else if (laser.r === 6) {
-      laser.x--;
-    } else if (laser.r === 7) {
-      laser.x--;
-      laser.y--;
+    if (this.collision()) {
+      this.endGame();
     }
-    return laser;
-  });
 
-  lasers = lasers.filter((laser) => {
-    if (laser.x < 0) return false;
-    else if (laser.x > fields - 1) return false;
-    else if (laser.y < 0) return false;
-    else if (laser.y > fields - 1) return false;
+    // displayMissiles
+    this.sendGameState();
+  }
 
-    let laserXMissile = false;
-    let removes = [];
-    for (var i = 0; i < missiles.length; i++) {
-      var missile = missiles[i];
+  collision() {
+    for (var i = 0; i < this.missiles.length; i++) {
+      var missile = this.missiles[i];
       if (
-        (missile.x === laser.x ||
-          missile.x === laser.x + 1 ||
-          missile.x === laser.x - 1) &&
-        (missile.y === laser.y ||
-          missile.y === laser.y + 1 ||
-          missile.y === laser.y - 1)
+        missile.x === mid.x + 1 ||
+        missile.x === mid.x - 1 ||
+        missile.y === mid.y + 1 ||
+        missile.y === mid.y - 1
       ) {
-        laserXMissile = true;
-        removes.push(i);
-        break;
+        return true;
       }
     }
+    return false;
+  }
 
-    if (removes.length > 0) {
-      deleteMissiles();
-      removes.forEach((remove) => {
-        missiles.splice(remove, 1);
-      });
-      displayMissiles();
+  addLaser() {
+    // 7 0 1
+    // 6   2
+    // 5 4 3
+    let retObj = { x: mid.x, y: mid.y, r: this.rShip };
+
+    if (this.rShip === 0) {
+      retObj.y = mid.y - 2;
+    } else if (this.rShip === 1) {
+      retObj.x = mid.x + 2;
+      retObj.y = mid.y - 2;
+    } else if (this.rShip === 2) {
+      retObj.x = mid.x + 2;
+    } else if (this.rShip === 3) {
+      retObj.x = mid.x + 2;
+      retObj.y = mid.y + 2;
+    } else if (this.rShip === 4) {
+      retObj.y = mid.y + 2;
+    } else if (this.rShip === 5) {
+      retObj.x = mid.x - 2;
+      retObj.y = mid.y + 2;
+    } else if (this.rShip === 6) {
+      retObj.x = mid.x - 2;
+    } else if (this.rShip === 7) {
+      retObj.x = mid.x - 2;
+      retObj.y = mid.y - 2;
     }
 
-    return !laserXMissile;
-  });
+    this.lasers.push(retObj);
+  }
 
-  displayLasers();
+  moveLasers() {
+    // move lasers
+    this.lasers = this.lasers.map((laser) => {
+      if (laser.r === 0) {
+        laser.y--;
+      } else if (laser.r === 1) {
+        laser.x++;
+        laser.y--;
+      } else if (laser.r === 2) {
+        laser.x++;
+      } else if (laser.r === 3) {
+        laser.x++;
+        laser.y++;
+      } else if (laser.r === 4) {
+        laser.y++;
+      } else if (laser.r === 5) {
+        laser.x--;
+        laser.y++;
+      } else if (laser.r === 6) {
+        laser.x--;
+      } else if (laser.r === 7) {
+        laser.x--;
+        laser.y--;
+      }
+      return laser;
+    });
+
+    this.lasers = this.lasers.filter((laser) => {
+      if (laser.x < 0) return false;
+      else if (laser.x > fields - 1) return false;
+      else if (laser.y < 0) return false;
+      else if (laser.y > fields - 1) return false;
+
+      let laserXMissile = false;
+      let removes = [];
+      for (var i = 0; i < this.missiles.length; i++) {
+        var missile = this.missiles[i];
+        if (
+          (missile.x === laser.x ||
+            missile.x === laser.x + 1 ||
+            missile.x === laser.x - 1) &&
+          (missile.y === laser.y ||
+            missile.y === laser.y + 1 ||
+            missile.y === laser.y - 1)
+        ) {
+          laserXMissile = true;
+          removes.push(i);
+          break;
+        }
+      }
+
+      if (removes.length > 0) {
+        removes.forEach((remove) => {
+          this.missiles.splice(remove, 1);
+        });
+        this.sendGameState();
+      }
+
+      return !laserXMissile;
+    });
+
+    this.sendGameState();
+  }
+
+  incrementScore(hm) {
+    this.score = this.score + hm;
+  }
+
+  startGame() {
+    this.score = 0;
+    this.mainLoop();
+  }
+
+  endGame() {
+    clearInterval(this.ival);
+    this.ival = null;
+  }
+
+  mainLoop() {
+    this.ival = setInterval(() => {
+      this.moveMissiles();
+      this.moveLasers();
+      this.counter++;
+      this.incrementScore(10);
+      if (this.counter % 5 === 0) this.addMissile();
+      if (this.counter % 20 === 0) {
+        clearInterval(this.ival);
+        this.speed = Math.round(this.speed / 2);
+        this.mainLoop();
+      }
+    }, this.speed);
+  }
+
+  preGame() {
+    var countdown = 5;
+    for (var i = 0; i < countdown; i++) {
+      ((i) => {
+        setTimeout(() => {}, i * 1000);
+      })(i);
+    }
+    setTimeout(() => {
+      this.startGame();
+    }, (countdown + 1) * 1000);
+  }
+
+  sendGameState() {
+    this.ws.send(
+      JSON.stringify({
+        xShip: this.xShip,
+        yShip: this.yShip,
+        rShip: this.rShip,
+        missiles: this.missiles,
+        lasers: this.lasers,
+        score: this.score,
+        speed: this.speed,
+      }),
+    );
+  }
 }
-
-var counter = 0;
-var ival = null;
-var speed = 1000;
-var score = 0;
-var incrementScore = (hm) => {
-  score = score + hm;
-};
-
-var startGame = () => {
-  score = 0;
-  mainLoop();
-};
-
-var mainLoop = () => {
-  ival = setInterval(() => {
-    moveMissiles();
-    moveLasers();
-    counter++;
-    incrementScore(10);
-    if (counter % 5 === 0) addMissile();
-    if (counter % 20 === 0) {
-      clearInterval(ival);
-      speed = Math.round(speed / 2);
-      mainLoop();
-    }
-  }, speed);
-};
-
-window.addEventListener('start', startGame);
-let preGame = () => {
-  var countdown = 5;
-  for (var i = 0; i < countdown; i++) {
-    ((i) => {
-      setTimeout(() => {
-        //                 console.log(countdown-i);
-      }, i * 1000);
-    })(i);
-  }
-  setTimeout(() => {
-    startGame();
-  }, (countdown + 1) * 1000);
-};
-preGame();
-
-var endGame = function () {
-  clearInterval(ival);
-};
-
-window.addEventListener('keydown', (ev) => {
-  if (ev.code === 'ArrowLeft') rotateShip(-1);
-  else if (ev.code === 'ArrowRight') rotateShip(1);
-  else if (ev.code === 'Space') {
-    addLaser();
-  }
-});

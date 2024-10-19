@@ -2,20 +2,5 @@ services:
   web:
     build: .
     ports:
-      - "8080:80"
-      - "8082:82"
-
-  db:
-    image: postgres
-    restart: always
-    shm_size: "128mb"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - "8084:8080"
+      - '8080:8080'
+      - '8082:8082'
