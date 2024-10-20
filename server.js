@@ -1,6 +1,7 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { Game } from './game.js';
+import pages from './pages.js';
 
 const HTTP_PORT = 8080;
 const WS_PORT = 8082;
@@ -19,49 +20,11 @@ app.use(express.static('public'));
 app.use(express.json());
 
 app.get('/api/', (req, res) => {
-  res.json([
-    {
-      tag: 'p',
-      id: 'score',
-      innerText: 'Score: 0',
-    },
-    {
-      tag: 'p',
-      id: 'speed',
-      innerText: 'Speed: 1000',
-    },
-    {
-      tag: 'canvas',
-      id: 'game',
-      style: 'border: 1px solid black;',
-    },
-  ]);
+  res.json(pages.index);
 });
 
 app.get('/api/login', (req, res) => {
-  res.json([
-    {
-      tag: 'form',
-      innerHtml: [
-        {
-          tag: 'input',
-          id: 'username',
-          class: 'input',
-          innerText: 'Username',
-        },
-        {
-          tag: 'input',
-          id: 'password',
-          class: 'input',
-          innerText: 'Password',
-        },
-        {
-          tag: 'button',
-          innerText: 'Login',
-        },
-      ],
-    },
-  ]);
+  res.json(pages.login);
 });
 
 app.post('/api/rotate', (req, res) => {
@@ -75,12 +38,7 @@ app.post('/api/laser', (req, res) => {
 });
 
 app.get('/api/*', (req, res) => {
-  res.json([
-    {
-      tag: 'p',
-      innerText: '404 Not Found',
-    },
-  ]);
+  res.json(pages.notFound);
 });
 
 app.get('/*', (req, res) => {
@@ -97,7 +55,10 @@ wss.on('connection', function connection(ws) {
   game = new Game(ws);
   game.preGame();
 
-  ws.on('message', function message(data) {});
+  ws.on('message', (data) => {
+    const message = JSON.parse(data);
+    console.log(message);
+  });
 
   ws.on('close', () => {
     console.log('disconnected');

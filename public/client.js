@@ -93,13 +93,11 @@ spaceShipImage.src =
 
 // Source: https://opengameart.org/content/brown-asteroid
 // License(s): CC-BY 4.0, CC-BY 3.0, CC-BY-SA 4.0, CC-BY-SA 3.0
-
 asteroidImage.src =
   'https://opengameart.org/sites/default/files/styles/medium/public/Asteroid%20Brown.png';
 
 // Source: https://opengameart.org/content/snowball-pixel-art
 // License(s): CC
-
 snowBallImage.src =
   'https://opengameart.org/sites/default/files/styles/medium/public/snowball.png';
 
@@ -165,10 +163,25 @@ function displayInfo() {
   scoreElement.innerText = `Score: ${score}`;
 }
 
+function getUserID() {
+  const userID = localStorage.getItem('user');
+  if (userID) return userID;
+  const newUserID = crypto.randomUUID();
+  localStorage.setItem('user', newUserID);
+  return newUserID;
+}
+
+const userID = getUserID();
 const ws = new WebSocket('ws://localhost:8082');
 
 ws.addEventListener('open', () => {
   console.log('Connected to server');
+  ws.send(
+    JSON.stringify({
+      type: 'connect',
+      userID,
+    }),
+  );
 });
 
 ws.addEventListener('message', (event) => {
