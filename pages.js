@@ -151,6 +151,13 @@ const register = [
   },
 ];
 
+const admin = [
+  {
+    tag: 'h1',
+    innerText: 'Admin',
+  },
+];
+
 const notFound = [
   {
     tag: 'p',
@@ -162,5 +169,6 @@ export default {
   index,
   login,
   register,
+  admin,
   notFound,
 };

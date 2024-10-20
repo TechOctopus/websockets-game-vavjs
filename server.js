@@ -13,7 +13,7 @@ const wss = new WebSocketServer({ port: WS_PORT });
 const games = {};
 
 app.use((req, res, next) => {
-  console.log(`Request: ${req.method} ${req.url} ${req.headers.userid}`);
+  console.log(`Request: ${req.method} ${req.url}`);
   next();
 });
 
@@ -30,6 +30,10 @@ app.get('/api/login', (req, res) => {
 
 app.get('/api/register', (req, res) => {
   res.json(pages.register);
+});
+
+app.get('/api/admin', (req, res) => {
+  res.json(pages.admin);
 });
 
 app.post('/api/rotate', (req, res) => {
