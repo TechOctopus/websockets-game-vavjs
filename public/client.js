@@ -42,6 +42,11 @@ function renderTag(data) {
   const tag = document.createElement(data.tag);
   if (data.id) tag.id = data.id;
   if (data.style) tag.style = data.style;
+  if (data.type) tag.type = data.type;
+  if (data.placeholder) tag.placeholder = data.placeholder;
+  if (data.action) tag.action = data.action;
+  if (data.required) tag.required = data.required;
+  if (data.href) tag.href = data.href;
   if (data.innerText) tag.innerText = data.innerText;
   if (data.innerHtml) {
     data.innerHtml.forEach((element) => {

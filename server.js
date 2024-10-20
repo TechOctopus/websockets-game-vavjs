@@ -28,6 +28,10 @@ app.get('/api/login', (req, res) => {
   res.json(pages.login);
 });
 
+app.get('/api/register', (req, res) => {
+  res.json(pages.register);
+});
+
 app.post('/api/rotate', (req, res) => {
   const userID = req.headers.userid;
   if (games[userID]) games[userID].rotateShip(req.body.direction);
@@ -57,7 +61,6 @@ wss.on('connection', function connection(ws) {
 
   ws.on('message', (data) => {
     const message = JSON.parse(data);
-    console.log(message.userID);
     if (!games[message.userID]) {
       games[message.userID] = new Game(ws);
       games[message.userID].preGame();
