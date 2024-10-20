@@ -1,6 +1,8 @@
+// Heorhi Davydau
 import express from 'express';
 import { WebSocketServer } from 'ws';
-import { Game } from './game.js';
+
+import Game from './game.js';
 import pages from './pages.js';
 
 const HTTP_PORT = 8080;
