@@ -1,1 +1,2 @@
-- Can i use [uuid](https://www.npmjs.com/package/uuid?activeTab=readme) library
+- Do we need implement all tasks from previous homeworks (restart, debug, etc.)?
+- Is that ok that i use crypto Api and local storage for auth?
