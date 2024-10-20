@@ -6,6 +6,16 @@ const mid = {
   y: Math.floor(yFields / 2),
 };
 
+function getUserID() {
+  const userID = localStorage.getItem('user');
+  if (userID) return userID;
+  const newUserID = crypto.randomUUID();
+  localStorage.setItem('user', newUserID);
+  return newUserID;
+}
+
+const userID = getUserID();
+
 const root = document.body;
 
 async function api(endpoint, method = 'GET', body = {}) {
@@ -17,6 +27,7 @@ async function api(endpoint, method = 'GET', body = {}) {
   };
 
   if (method !== 'GET') options.body = JSON.stringify(body);
+  if (userID) options.headers.userID = userID;
 
   const response = await fetch(`/api${endpoint}`, options);
 
@@ -163,15 +174,6 @@ function displayInfo() {
   scoreElement.innerText = `Score: ${score}`;
 }
 
-function getUserID() {
-  const userID = localStorage.getItem('user');
-  if (userID) return userID;
-  const newUserID = crypto.randomUUID();
-  localStorage.setItem('user', newUserID);
-  return newUserID;
-}
-
-const userID = getUserID();
 const ws = new WebSocket('ws://localhost:8082');
 
 ws.addEventListener('open', () => {

@@ -10,11 +10,10 @@ const WS_PORT = 8082;
 
 const app = express();
 const wss = new WebSocketServer({ port: WS_PORT });
-
-let game = null;
+const games = {};
 
 app.use((req, res, next) => {
-  console.log(`Request: ${req.method} ${req.url}`);
+  console.log(`Request: ${req.method} ${req.url} ${req.headers.userid}`);
   next();
 });
 
@@ -30,12 +29,14 @@ app.get('/api/login', (req, res) => {
 });
 
 app.post('/api/rotate', (req, res) => {
-  if (game) game.rotateShip(req.body.direction);
+  const userID = req.headers.userid;
+  if (games[userID]) games[userID].rotateShip(req.body.direction);
   res.status(200).send({ status: 'ok' });
 });
 
 app.post('/api/laser', (req, res) => {
-  if (game) game.addLaser();
+  const userID = req.headers.userid;
+  if (games[userID]) games[userID].addLaser();
   res.status(200).send({ status: 'ok' });
 });
 
@@ -54,23 +55,34 @@ app.listen(HTTP_PORT, () => {
 wss.on('connection', function connection(ws) {
   console.log('connected');
 
-  game = new Game(ws);
-  game.preGame();
-
   ws.on('message', (data) => {
     const message = JSON.parse(data);
-    console.log(message);
+    console.log(message.userID);
+    if (!games[message.userID]) {
+      games[message.userID] = new Game(ws);
+      games[message.userID].preGame();
+    }
   });
 
   ws.on('close', () => {
     console.log('disconnected');
-    if (game) game.endGame();
-    game = null;
+    const userID = Object.keys(games).find(
+      (key) => games[key].getGameWSocket() === ws,
+    );
+    if (userID) {
+      games[userID].endGame();
+      delete games[userID];
+    }
   });
 
   ws.on('error', (err) => {
     console.error(err);
-    if (game) game.endGame();
-    game = null;
+    const userID = Object.keys(games).find(
+      (key) => games[key].getGameWSocket() === ws,
+    );
+    if (userID) {
+      games[userID].endGame();
+      delete games[userID];
+    }
   });
 });

@@ -246,4 +246,8 @@ export default class Game {
       }),
     );
   }
+
+  getGameWSocket() {
+    return this.ws;
+  }
 }
