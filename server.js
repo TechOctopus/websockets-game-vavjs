@@ -4,12 +4,14 @@ import { WebSocketServer } from 'ws';
 
 import Game from './game.js';
 import pages from './pages.js';
+import Auth from './auth.js';
 
 const HTTP_PORT = 8080;
 const WS_PORT = 8082;
 
 const app = express();
 const wss = new WebSocketServer({ port: WS_PORT });
+const auth = new Auth();
 const games = {};
 
 app.use((req, res, next) => {
@@ -33,11 +35,24 @@ app.post('/api/login', (req, res) => {
   const login = req.body.login;
   const email = req.body.email;
 
-  console.log('login', login);
-  console.log('password', password);
-  console.log('email', email);
+  if (
+    login === 'none' ||
+    email === 'none' ||
+    password === 'none' ||
+    !login ||
+    !email ||
+    !password
+  ) {
+    return res.status(401).send({ error: 'Invalid data' });
+  }
 
-  res.status(200).send({ status: 'ok' });
+  const token = auth.login(login, email, password);
+
+  if (!token) {
+    return res.status(401).send({ error: 'Invalid data' });
+  }
+
+  res.status(200).send({ token });
 });
 
 app.get('/api/register', (req, res) => {
@@ -50,10 +65,25 @@ app.post('/api/register', (req, res) => {
   const login = req.body.login;
   const email = req.body.email;
 
-  console.log('login', login);
-  console.log('password', password);
-  console.log('confirm password', confirmPassword);
-  console.log('email', email);
+  if (
+    login === 'none' ||
+    email === 'none' ||
+    password === 'none' ||
+    confirmPassword === 'none' ||
+    !login ||
+    !email ||
+    !password ||
+    !confirmPassword ||
+    password !== confirmPassword
+  ) {
+    return res.status(401).send({ error: 'Invalid data' });
+  }
+
+  const result = auth.register(login, email, password);
+
+  if (!result) {
+    return res.status(401).send({ error: 'Invalid data' });
+  }
 
   res.status(200).send({ status: 'ok' });
 });

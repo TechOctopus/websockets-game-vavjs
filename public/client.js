@@ -6,6 +6,10 @@ const mid = {
   y: Math.floor(yFields / 2),
 };
 
+function setUserID(userID) {
+  localStorage.setItem('user', userID);
+}
+
 function getUserID() {
   const userID = localStorage.getItem('user');
   if (userID) return userID;
@@ -230,7 +234,7 @@ function game() {
 }
 
 function login() {
-  const formElement = document.getElementById('login');
+  const formElement = document.getElementById('login-form');
   const loginElement = document.getElementById('login');
   const emailElement = document.getElementById('email');
   const passwordElement = document.getElementById('password');
@@ -248,7 +252,8 @@ function login() {
         if (!responce.status === 'ok') {
           errorElement.innerText = 'Invalid data';
         }
-        console.log('ok');
+        setUserID(responce.token);
+        window.location.href = '/';
       })
       .catch((error) => {
         errorElement.innerText = 'Something went wrong';
@@ -257,7 +262,7 @@ function login() {
 }
 
 function register() {
-  const formElement = document.getElementById('register');
+  const formElement = document.getElementById('register-form');
   const loginElement = document.getElementById('login');
   const emailElement = document.getElementById('email');
   const passwordElement = document.getElementById('password');

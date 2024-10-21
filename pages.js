@@ -41,8 +41,7 @@ const login = [
       },
       {
         tag: 'form',
-        id: 'login',
-        action: '/login',
+        id: 'login-form',
         style: 'display: grid; place-items: center; gap: 1rem;',
         innerHtml: [
           {
@@ -107,7 +106,7 @@ const register = [
       },
       {
         tag: 'form',
-        id: 'register',
+        id: 'register-form',
         style: 'display: grid; place-items: center; gap: 1rem;',
         innerHtml: [
           {

@@ -2,3 +2,6 @@
 - Is that ok that i use crypto Api and local storage for auth?
 - Is only html validation (js password =) enough for this task?
 - Can i save dont hash password or if i need to hash it can i use library for that?
+- Do we need email field in login form?
+- Is that ok that login && email are unique and can not be changed?
+- Can i use [uuid](https://www.npmjs.com/package/uuid)?
