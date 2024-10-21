@@ -41,12 +41,14 @@ const login = [
       },
       {
         tag: 'form',
+        id: 'login',
         action: '/login',
         style: 'display: grid; place-items: center; gap: 1rem;',
         innerHtml: [
           {
             tag: 'input',
             id: 'login',
+            name: 'login',
             type: 'text',
             placeholder: 'Login',
             required: true,
@@ -54,6 +56,7 @@ const login = [
           {
             tag: 'input',
             id: 'email',
+            name: 'email',
             type: 'email',
             placeholder: 'Email',
             required: true,
@@ -61,29 +64,28 @@ const login = [
           {
             tag: 'input',
             id: 'password',
+            name: 'password',
             type: 'password',
             placeholder: 'Password',
-            required: true,
-          },
-          {
-            tag: 'input',
-            id: 'password_confirm',
-            type: 'password',
-            placeholder: 'Confirm Password',
             required: true,
           },
           {
             tag: 'button',
             type: 'submit',
             innerText: 'Login',
-            required: true,
           },
         ],
       },
       {
+        tag: 'p',
+        id: 'error',
+        style: 'color: red;',
+        innerText: '',
+      },
+      {
         tag: 'a',
         href: '/register',
-        innerText: 'Already have an account?',
+        innerText: "Don't have an account?",
       },
       {
         tag: 'a',
@@ -105,12 +107,13 @@ const register = [
       },
       {
         tag: 'form',
-        action: '/register',
+        id: 'register',
         style: 'display: grid; place-items: center; gap: 1rem;',
         innerHtml: [
           {
             tag: 'input',
             id: 'login',
+            name: 'login',
             type: 'text',
             placeholder: 'Login',
             required: true,
@@ -118,6 +121,7 @@ const register = [
           {
             tag: 'input',
             id: 'email',
+            name: 'email',
             type: 'email',
             placeholder: 'Email',
             required: true,
@@ -125,22 +129,36 @@ const register = [
           {
             tag: 'input',
             id: 'password',
+            name: 'password',
             type: 'password',
             placeholder: 'Password',
+            required: true,
+          },
+          {
+            tag: 'input',
+            id: 'password_confirm',
+            name: 'confirmPassword',
+            type: 'password',
+            placeholder: 'Confirm Password',
             required: true,
           },
           {
             tag: 'button',
             type: 'submit',
             innerText: 'Login',
-            required: true,
           },
         ],
       },
       {
+        tag: 'p',
+        id: 'error',
+        style: 'color: red;',
+        innerText: '',
+      },
+      {
         tag: 'a',
         href: '/login',
-        innerText: "Don't have an account?",
+        innerText: 'Already have an account?',
       },
       {
         tag: 'a',

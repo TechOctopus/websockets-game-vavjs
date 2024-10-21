@@ -1,2 +1,4 @@
 - Do we need implement all tasks from previous homeworks (restart, debug, etc.)?
 - Is that ok that i use crypto Api and local storage for auth?
+- Is only html validation (js password =) enough for this task?
+- Can i save dont hash password or if i need to hash it can i use library for that?

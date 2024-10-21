@@ -28,8 +28,34 @@ app.get('/api/login', (req, res) => {
   res.json(pages.login);
 });
 
+app.post('/api/login', (req, res) => {
+  const password = req.body.password;
+  const login = req.body.login;
+  const email = req.body.email;
+
+  console.log('login', login);
+  console.log('password', password);
+  console.log('email', email);
+
+  res.status(200).send({ status: 'ok' });
+});
+
 app.get('/api/register', (req, res) => {
   res.json(pages.register);
+});
+
+app.post('/api/register', (req, res) => {
+  const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
+  const login = req.body.login;
+  const email = req.body.email;
+
+  console.log('login', login);
+  console.log('password', password);
+  console.log('confirm password', confirmPassword);
+  console.log('email', email);
+
+  res.status(200).send({ status: 'ok' });
 });
 
 app.get('/api/admin', (req, res) => {
