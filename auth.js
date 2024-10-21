@@ -24,7 +24,11 @@ export default class Auth {
   }
 
   register(login, email, password) {
-    const user = this.CSV.getUser(login, email);
+    if (this.CSV.checkUserLoginAndEmail(login, email)) {
+      return false;
+    }
+
+    const user = this.CSV.getUser(login, email, password);
 
     if (user) {
       return false;

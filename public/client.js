@@ -293,7 +293,7 @@ function register() {
         if (!responce.status === 'ok') {
           errorElement.innerText = 'Invalid data';
         }
-        console.log('ok');
+        window.location.href = '/login';
       })
       .catch((error) => {
         errorElement.innerText = 'Something went wrong';

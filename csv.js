@@ -49,6 +49,12 @@ export default class CSV {
       : undefined;
   }
 
+  checkUserLoginAndEmail(login, email) {
+    return this.CSVfile.some(
+      (line) => line[LOGIN_FIELD] === login || line[EMAIL_FIELD] === email,
+    );
+  }
+
   setUser(login, email, password, maxScore = 'none', maxSpeed = 'none') {
     const user = this.getUser(login, email);
     if (user) {
