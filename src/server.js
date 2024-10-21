@@ -19,7 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
+app.use(express.static('src/public'));
 app.use(express.json());
 
 app.get('/api/', (req, res) => {
@@ -109,7 +109,7 @@ app.get('/api/*', (req, res) => {
 });
 
 app.get('/*', (req, res) => {
-  res.sendFile('public/index.html', { root: '.' });
+  res.sendFile('src/public/index.html', { root: '.' });
 });
 
 app.listen(HTTP_PORT, () => {

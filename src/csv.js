@@ -1,7 +1,7 @@
 // Heorhi Davydau
 import fs from 'fs';
 
-const CSV_FILE = './data.csv';
+const CSV_FILE = 'src/data.csv';
 
 // Structure of the CSV file:
 // login, email, password, max score, max speed
