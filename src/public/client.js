@@ -37,7 +37,7 @@ async function api(endpoint, method = 'GET', body = {}) {
   if (method !== 'GET') options.body = JSON.stringify(body);
   if (userID) options.headers.Authorization = userID;
 
-  const response = await fetch(`/api${endpoint}`, options);
+  const response = await fetch(endpoint, options);
 
   if (!response.ok) {
     throw new Error(`Request failed: ${response.status}`);
@@ -77,7 +77,7 @@ function getPath() {
 }
 
 const pagePath = getPath();
-const data = await api(pagePath);
+const data = await api(`page/${pagePath}`);
 render(data);
 
 switch (pagePath) {
@@ -99,11 +99,11 @@ switch (pagePath) {
 
 function game() {
   async function rotateShip(direction) {
-    await api('/rotate', 'POST', { direction });
+    await api('api/rotate', 'POST', { direction });
   }
 
   async function addLaser() {
-    await api('/laser', 'POST');
+    await api('api/laser', 'POST');
   }
 
   window.addEventListener('keydown', async (ev) => {
@@ -242,14 +242,14 @@ async function index() {
 
   let user = null;
 
-  await api('/auth')
+  await api('api/auth')
     .then((responce) => {
       user = responce.user;
 
       const logoutBtnElement = document.createElement('button');
       logoutBtnElement.innerText = 'Logout';
       logoutBtnElement.addEventListener('click', async () => {
-        await api('/logout');
+        await api('api/logout');
         resetUserID();
         window.location.href = '/';
       });
@@ -280,7 +280,7 @@ function login() {
     const email = emailElement.value;
     const password = passwordElement.value;
 
-    api('/login', 'POST', { login, email, password })
+    api('api/login', 'POST', { login, email, password })
       .then((responce) => {
         if (!responce.status === 'ok') {
           errorElement.innerText = 'Invalid data';
@@ -321,7 +321,7 @@ function register() {
     const password = passwordElement.value;
     const confirmPassword = confirmPasswordElement.value;
 
-    api('/register', 'POST', { login, email, password, confirmPassword })
+    api('api/register', 'POST', { login, email, password, confirmPassword })
       .then((responce) => {
         if (!responce.status === 'ok') {
           errorElement.innerText = 'Invalid data';

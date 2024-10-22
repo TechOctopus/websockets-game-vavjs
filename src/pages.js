@@ -1,4 +1,6 @@
 // Heorhi Davydau
+import { Router } from 'express';
+
 const index = [
   {
     tag: 'section',
@@ -188,10 +190,24 @@ const notFound = [
   },
 ];
 
-export default {
-  index,
-  login,
-  register,
-  admin,
-  notFound,
-};
+export const pageRouter = Router();
+
+pageRouter.get('/', (req, res) => {
+  res.json(index);
+});
+
+pageRouter.get('/login', (req, res) => {
+  res.json(login);
+});
+
+pageRouter.get('/register', (req, res) => {
+  res.json(register);
+});
+
+pageRouter.get('/admin', (req, res) => {
+  res.json(admin);
+});
+
+pageRouter.get('/*', (req, res) => {
+  res.json(notFound);
+});

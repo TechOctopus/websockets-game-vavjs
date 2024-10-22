@@ -6,3 +6,4 @@
 - Is that ok that login && email are unique and can not be changed?
 - Can i use [uuid](https://www.npmjs.com/package/uuid)?
 - Can i have src folder in my project?
+- Can i save ship data in csv file?

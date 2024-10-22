@@ -3,15 +3,15 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 
 import Game from './game.js';
-import pages from './pages.js';
-import Auth from './auth.js';
+import { apiRouter } from './routes.js';
+import { pageRouter } from './pages.js';
 
 const HTTP_PORT = 8080;
 const WS_PORT = 8082;
 
 const app = express();
 const wss = new WebSocketServer({ port: WS_PORT });
-const auth = new Auth();
+
 const games = {};
 
 app.use((req, res, next) => {
@@ -21,89 +21,6 @@ app.use((req, res, next) => {
 
 app.use(express.static('src/public'));
 app.use(express.json());
-
-app.get('/api/', (req, res) => {
-  res.json(pages.index);
-});
-
-app.get('/api/auth', (req, res) => {
-  const token = req.headers.authorization;
-  const user = auth.getUser(token);
-  if (!user) return res.status(401).send({ error: 'Invalid token' });
-  res.status(200).send({ user });
-});
-
-app.get('/api/logout', (req, res) => {
-  const token = req.headers.authorization;
-  auth.logout(token);
-  res.status(200).send({ status: 'ok' });
-});
-
-app.get('/api/login', (req, res) => {
-  res.json(pages.login);
-});
-
-app.post('/api/login', (req, res) => {
-  const password = req.body.password;
-  const login = req.body.login;
-  const email = req.body.email;
-
-  if (
-    login === 'none' ||
-    email === 'none' ||
-    password === 'none' ||
-    !login ||
-    !email ||
-    !password
-  ) {
-    return res.status(401).send({ error: 'Invalid data' });
-  }
-
-  const token = auth.login(login, email, password);
-
-  if (!token) {
-    return res.status(401).send({ error: 'Invalid data' });
-  }
-
-  res.status(200).send({ token });
-});
-
-app.get('/api/register', (req, res) => {
-  res.json(pages.register);
-});
-
-app.post('/api/register', (req, res) => {
-  const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
-  const login = req.body.login;
-  const email = req.body.email;
-
-  if (
-    login === 'none' ||
-    email === 'none' ||
-    password === 'none' ||
-    confirmPassword === 'none' ||
-    !login ||
-    !email ||
-    !password ||
-    !confirmPassword ||
-    password !== confirmPassword
-  ) {
-    return res.status(401).send({ error: 'Invalid data' });
-  }
-
-  const result = auth.register(login, email, password);
-
-  if (!result) {
-    return res.status(401).send({ error: 'Invalid data' });
-  }
-
-  res.status(200).send({ status: 'ok' });
-});
-
-app.get('/api/admin', (req, res) => {
-  res.json(pages.admin);
-});
 
 app.post('/api/rotate', (req, res) => {
   const userID = req.headers.authorization;
@@ -117,9 +34,8 @@ app.post('/api/laser', (req, res) => {
   res.status(200).send({ status: 'ok' });
 });
 
-app.get('/api/*', (req, res) => {
-  res.json(pages.notFound);
-});
+app.use('/api', apiRouter);
+app.use('/page', pageRouter);
 
 app.get('/*', (req, res) => {
   res.sendFile('src/public/index.html', { root: '.' });
