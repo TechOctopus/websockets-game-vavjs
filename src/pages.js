@@ -33,6 +33,8 @@ const index = [
   },
   {
     tag: 'canvas',
+    width: '580',
+    height: '580',
     id: 'game',
     style: 'border: 1px solid black;',
   },

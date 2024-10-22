@@ -50,6 +50,8 @@ function renderTag(data) {
   const tag = document.createElement(data.tag);
   if (data.id) tag.id = data.id;
   if (data.style) tag.style = data.style;
+  if (data.width) tag.width = data.width;
+  if (data.height) tag.height = data.height;
   if (data.type) tag.type = data.type;
   if (data.placeholder) tag.placeholder = data.placeholder;
   if (data.action) tag.action = data.action;
@@ -255,7 +257,11 @@ async function index() {
       });
 
       const newUserElement = document.createElement('p');
-      newUserElement.innerText = `User: ${user.login}`;
+      newUserElement.innerText = `
+        User: ${user.login}
+        Max score: ${user.maxScore}
+        Max speed: ${user.maxSpeed}
+      `;
 
       userElement.innerHTML = '';
       userElement.appendChild(logoutBtnElement);
