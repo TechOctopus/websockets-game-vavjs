@@ -1,5 +1,6 @@
 // Heorhi Davydau
 import { Router } from 'express';
+import { auth } from './auth.js';
 
 const index = [
   {
@@ -207,6 +208,9 @@ pageRouter.get('/register', (req, res) => {
 });
 
 pageRouter.get('/admin', (req, res) => {
+  const userID = req.headers.authorization;
+  const user = auth.getUser(userID);
+  if (!user || user.login !== 'admin') return res.json(notFound);
   res.json(admin);
 });
 
