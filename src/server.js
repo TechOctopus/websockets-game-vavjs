@@ -26,6 +26,19 @@ app.get('/api/', (req, res) => {
   res.json(pages.index);
 });
 
+app.get('/api/auth', (req, res) => {
+  const token = req.headers.authorization;
+  const user = auth.getUser(token);
+  if (!user) return res.status(401).send({ error: 'Invalid token' });
+  res.status(200).send({ user });
+});
+
+app.get('/api/logout', (req, res) => {
+  const token = req.headers.authorization;
+  auth.logout(token);
+  res.status(200).send({ status: 'ok' });
+});
+
 app.get('/api/login', (req, res) => {
   res.json(pages.login);
 });
@@ -93,13 +106,13 @@ app.get('/api/admin', (req, res) => {
 });
 
 app.post('/api/rotate', (req, res) => {
-  const userID = req.headers.userid;
+  const userID = req.headers.authorization;
   if (games[userID]) games[userID].rotateShip(req.body.direction);
   res.status(200).send({ status: 'ok' });
 });
 
 app.post('/api/laser', (req, res) => {
-  const userID = req.headers.userid;
+  const userID = req.headers.authorization;
   if (games[userID]) games[userID].addLaser();
   res.status(200).send({ status: 'ok' });
 });

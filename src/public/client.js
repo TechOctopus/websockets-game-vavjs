@@ -6,6 +6,10 @@ const mid = {
   y: Math.floor(yFields / 2),
 };
 
+function resetUserID() {
+  localStorage.removeItem('user');
+}
+
 function setUserID(userID) {
   localStorage.setItem('user', userID);
 }
@@ -31,7 +35,7 @@ async function api(endpoint, method = 'GET', body = {}) {
   };
 
   if (method !== 'GET') options.body = JSON.stringify(body);
-  if (userID) options.headers.userID = userID;
+  if (userID) options.headers.Authorization = userID;
 
   const response = await fetch(`/api${endpoint}`, options);
 
@@ -78,7 +82,7 @@ render(data);
 
 switch (pagePath) {
   case '/': {
-    game();
+    index();
     break;
   }
   case '/login': {
@@ -231,6 +235,35 @@ function game() {
     displayLasers();
     displayInfo();
   });
+}
+
+async function index() {
+  const userElement = document.getElementById('user');
+
+  let user = null;
+
+  await api('/auth')
+    .then((responce) => {
+      user = responce.user;
+
+      const logoutBtnElement = document.createElement('button');
+      logoutBtnElement.innerText = 'Logout';
+      logoutBtnElement.addEventListener('click', async () => {
+        await api('/logout');
+        resetUserID();
+        window.location.href = '/';
+      });
+
+      const newUserElement = document.createElement('p');
+      newUserElement.innerText = `User: ${user.login}`;
+
+      userElement.innerHTML = '';
+      userElement.appendChild(logoutBtnElement);
+      userElement.appendChild(newUserElement);
+    })
+    .catch((error) => {});
+
+  game();
 }
 
 function login() {

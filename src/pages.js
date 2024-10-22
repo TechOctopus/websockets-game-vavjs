@@ -1,17 +1,23 @@
 // Heorhi Davydau
 const index = [
   {
-    tag: 'a',
-    href: '/login',
-    innerText: 'Login',
-  },
-  {
-    tag: 'br',
-  },
-  {
-    tag: 'a',
-    href: '/register',
-    innerText: 'Register',
+    tag: 'section',
+    id: 'user',
+    innerHtml: [
+      {
+        tag: 'a',
+        href: '/login',
+        innerText: 'Login',
+      },
+      {
+        tag: 'br',
+      },
+      {
+        tag: 'a',
+        href: '/register',
+        innerText: 'Register',
+      },
+    ],
   },
   {
     tag: 'p',
