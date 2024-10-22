@@ -1,15 +1,15 @@
 // Heorhi Davydau
-import CSV from './csv.js';
+import { csv } from './csv.js';
 import { v4 as uuidv4 } from 'uuid';
 
-export default class Auth {
+class Auth {
   constructor() {
     this.users = new Map();
-    this.CSV = new CSV();
+    this.csv = csv;
   }
 
   login(login, email, password) {
-    const user = this.CSV.getUser(login, email, password);
+    const user = this.csv.getUser(login, email, password);
 
     if (!user) {
       return undefined;
@@ -25,21 +25,23 @@ export default class Auth {
   }
 
   register(login, email, password) {
-    if (this.CSV.checkUserLoginAndEmail(login, email)) {
+    if (this.csv.checkUserLoginAndEmail(login, email)) {
       return false;
     }
 
-    const user = this.CSV.getUser(login, email, password);
+    const user = this.csv.getUser(login, email, password);
 
     if (user) {
       return false;
     }
 
-    this.CSV.setUser(login, email, password);
+    this.csv.setUser(login, email, password);
     return true;
   }
 
   getUser(token) {
-    return this.users.get(token);
+    return this.users.get(token) || this.csv.getUser();
   }
 }
+
+export const auth = new Auth();

@@ -1,4 +1,6 @@
 // Heorhi Davydau
+import { csv } from './csv.js';
+
 const xFields = 59;
 const yFields = 59;
 const fields = 59;
@@ -12,7 +14,8 @@ function random(min, max) {
 }
 
 export default class Game {
-  constructor(ws) {
+  constructor(user, ws) {
+    this.user = user;
     this.ws = ws;
     this.xShip = mid.x;
     this.yShip = mid.y;
@@ -204,6 +207,12 @@ export default class Game {
   endGame() {
     clearInterval(this.ival);
     this.ival = null;
+    csv.updateUserData(
+      this.user.login,
+      this.user.email,
+      this.score,
+      this.speed,
+    );
   }
 
   mainLoop() {

@@ -5,6 +5,7 @@ import { WebSocketServer } from 'ws';
 import Game from './game.js';
 import { apiRouter } from './routes.js';
 import { pageRouter } from './pages.js';
+import { auth } from './auth.js';
 
 const HTTP_PORT = 8080;
 const WS_PORT = 8082;
@@ -50,9 +51,12 @@ wss.on('connection', function connection(ws) {
 
   ws.on('message', (data) => {
     const message = JSON.parse(data);
-    if (!games[message.userID]) {
-      games[message.userID] = new Game(ws);
-      games[message.userID].preGame();
+    const userID = message.userID;
+    const user = auth.getUser(userID);
+
+    if (!games[userID]) {
+      games[userID] = new Game(user, ws);
+      games[userID].preGame();
     }
   });
 

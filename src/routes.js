@@ -1,8 +1,6 @@
 // Heorhi Davydau
 import { Router } from 'express';
-import Auth from './auth.js';
-
-const auth = new Auth();
+import { auth } from './auth.js';
 
 export const apiRouter = Router();
 

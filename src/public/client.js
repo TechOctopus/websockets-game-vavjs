@@ -248,6 +248,16 @@ async function index() {
     .then((responce) => {
       user = responce.user;
 
+      if (user.login === 'none') {
+        const newUserElement = document.createElement('p');
+        newUserElement.innerText = `
+          Max score: ${user.maxScore}
+          Max speed: ${user.maxSpeed}
+        `;
+        userElement.appendChild(newUserElement);
+        return;
+      }
+
       const logoutBtnElement = document.createElement('button');
       logoutBtnElement.innerText = 'Logout';
       logoutBtnElement.addEventListener('click', async () => {

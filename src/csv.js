@@ -13,7 +13,7 @@ const PASSWORD_FIELD = 2;
 const MAX_SCORE_FIELD = 3;
 const MAX_SPEED_FIELD = 4;
 
-export default class CSV {
+class CSV {
   constructor() {
     this.CSVfile = this.readAndParseCSV();
   }
@@ -31,7 +31,7 @@ export default class CSV {
     fs.writeFileSync(CSV_FILE, data);
   }
 
-  getUser(login, email, password) {
+  getUser(login = 'none', email = 'none', password = 'none') {
     const data = this.CSVfile.find(
       (line) =>
         line[LOGIN_FIELD] === login &&
@@ -66,4 +66,22 @@ export default class CSV {
     }
     this.saveCSV();
   }
+
+  updateUserData(login, email, score, speed) {
+    this.CSVfile = this.CSVfile.map((line) => {
+      if (line[LOGIN_FIELD] === login && line[EMAIL_FIELD] === email) {
+        if (score > line[MAX_SCORE_FIELD] || line[MAX_SCORE_FIELD] === 'none') {
+          line[MAX_SCORE_FIELD] = score;
+        }
+
+        if (speed < line[MAX_SPEED_FIELD] || line[MAX_SPEED_FIELD] === 'none') {
+          line[MAX_SPEED_FIELD] = speed;
+        }
+      }
+      return line;
+    });
+    this.saveCSV();
+  }
 }
+
+export const csv = new CSV();
