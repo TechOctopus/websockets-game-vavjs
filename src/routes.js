@@ -1,6 +1,7 @@
 // Heorhi Davydau
 import { Router } from 'express';
 import { auth } from './auth.js';
+import { csv } from './csv.js';
 
 export const apiRouter = Router();
 
@@ -69,4 +70,13 @@ apiRouter.post('/register', (req, res) => {
   }
 
   res.status(200).send({ status: 'ok' });
+});
+
+apiRouter.get('/users', (req, res) => {
+  const token = req.headers.authorization;
+  const user = auth.getUser(token);
+  if (!user || user.login !== 'admin') {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+  res.status(200).send(csv.getUsers());
 });

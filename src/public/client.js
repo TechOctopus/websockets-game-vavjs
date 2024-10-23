@@ -95,6 +95,10 @@ switch (pagePath) {
     register();
     break;
   }
+  case '/admin': {
+    admin();
+    break;
+  }
   default:
     break;
 }
@@ -277,9 +281,54 @@ async function index() {
       userElement.appendChild(logoutBtnElement);
       userElement.appendChild(newUserElement);
     })
-    .catch((error) => {});
+    .catch((error) => {
+      console.error(error);
+    });
 
   game();
+}
+
+async function admin() {
+  const usersTableElement = document.getElementById('users-table');
+  await api('api/users')
+    .then((responce) => {
+      responce.users.forEach((user) => {
+        const rowElement = document.createElement('tr');
+        const loginElement = document.createElement('td');
+        const emailElement = document.createElement('td');
+        const scoreElement = document.createElement('td');
+        const speedElement = document.createElement('td');
+        const deleteElement = document.createElement('td');
+
+        loginElement.innerText = user.login;
+        emailElement.innerText = user.email;
+        scoreElement.innerText = user.maxScore;
+        speedElement.innerText = user.maxSpeed;
+
+        const deleteButtonElement = document.createElement('button');
+        deleteButtonElement.innerText = 'Delete';
+        deleteButtonElement.addEventListener('click', async () => {
+          await api('api/delete', 'POST', {
+            login: user.login,
+            email: user.email,
+          });
+          window.location.href = '/admin';
+        });
+
+        deleteElement.appendChild(deleteButtonElement);
+
+        rowElement.appendChild(loginElement);
+        rowElement.appendChild(emailElement);
+        rowElement.appendChild(scoreElement);
+        rowElement.appendChild(speedElement);
+        rowElement.appendChild(deleteElement);
+
+        usersTableElement.appendChild(rowElement);
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
 function login() {

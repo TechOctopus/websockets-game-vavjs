@@ -82,6 +82,18 @@ class CSV {
     });
     this.saveCSV();
   }
+
+  getUsers() {
+    return {
+      users: this.CSVfile.map((line) => ({
+        login: line[LOGIN_FIELD],
+        email: line[EMAIL_FIELD],
+        password: line[PASSWORD_FIELD],
+        maxScore: line[MAX_SCORE_FIELD],
+        maxSpeed: line[MAX_SPEED_FIELD],
+      })),
+    };
+  }
 }
 
 export const csv = new CSV();

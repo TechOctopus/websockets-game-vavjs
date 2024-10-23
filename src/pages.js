@@ -184,6 +184,37 @@ const admin = [
     tag: 'h1',
     innerText: 'Admin',
   },
+  {
+    tag: 'table',
+    id: 'users-table',
+    innerHtml: [
+      {
+        tag: 'tr',
+        innerHtml: [
+          {
+            tag: 'th',
+            innerText: 'Login',
+          },
+          {
+            tag: 'th',
+            innerText: 'Email',
+          },
+          {
+            tag: 'th',
+            innerText: 'Score',
+          },
+          {
+            tag: 'th',
+            innerText: 'Speed',
+          },
+          {
+            tag: 'th',
+            innerText: 'Action',
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 const notFound = [
