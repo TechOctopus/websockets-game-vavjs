@@ -37,13 +37,16 @@ async function api(endpoint, method = 'GET', body = {}) {
   if (method !== 'GET') options.body = JSON.stringify(body);
   if (userID) options.headers.Authorization = userID;
 
-  const response = await fetch(endpoint, options);
-
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-
-  return response.json();
+  return await fetch(endpoint, options)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Invalid data');
+      }
+      return response.json();
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 }
 
 function renderTag(data) {
@@ -102,7 +105,7 @@ async function renderPage(page) {
   });
 }
 
-async function switchPage(page = '') {
+async function switchPage(page = 'home') {
   console.log('page', page);
   await renderPage(page);
   switch (page) {
@@ -114,6 +117,9 @@ async function switchPage(page = '') {
       break;
     case 'register':
       register();
+      break;
+    case 'home':
+      index();
       break;
     default:
       index();
@@ -263,46 +269,36 @@ function game() {
 }
 
 async function index() {
-  // const userElement = document.getElementById('user');
+  const userElement = document.getElementById('user');
 
-  // let user = null;
+  let user = null;
 
-  // await api('api/auth')
-  //   .then((responce) => {
-  //     user = responce.user;
+  await api('api/auth')
+    .then((responce) => {
+      user = responce.user;
 
-  //     if (user.login === 'none') {
-  //       const newUserElement = document.createElement('p');
-  //       newUserElement.innerText = `
-  //         Max score: ${user.maxScore}
-  //         Max speed: ${user.maxSpeed}
-  //       `;
-  //       userElement.appendChild(newUserElement);
-  //       return;
-  //     }
+      const logoutBtnElement = document.createElement('button');
+      logoutBtnElement.innerText = 'Logout';
+      logoutBtnElement.addEventListener('click', async () => {
+        await api('api/logout');
+        resetUserID();
+        window.location.href = '/';
+      });
 
-  //     const logoutBtnElement = document.createElement('button');
-  //     logoutBtnElement.innerText = 'Logout';
-  //     logoutBtnElement.addEventListener('click', async () => {
-  //       await api('api/logout');
-  //       resetUserID();
-  //       window.location.href = '/';
-  //     });
+      const newUserElement = document.createElement('p');
+      newUserElement.innerText = `
+        User: ${user.login}
+        Max score: ${user.maxScore}
+        Max speed: ${user.maxSpeed}
+      `;
 
-  //     const newUserElement = document.createElement('p');
-  //     newUserElement.innerText = `
-  //       User: ${user.login}
-  //       Max score: ${user.maxScore}
-  //       Max speed: ${user.maxSpeed}
-  //     `;
-
-  //     userElement.innerHTML = '';
-  //     userElement.appendChild(logoutBtnElement);
-  //     userElement.appendChild(newUserElement);
-  //   })
-  //   .catch((error) => {
-  //     console.error(error);
-  //   });
+      userElement.innerHTML = '';
+      userElement.appendChild(logoutBtnElement);
+      userElement.appendChild(newUserElement);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 
   game();
 }
@@ -353,27 +349,22 @@ async function admin() {
 function login() {
   const formElement = document.getElementById('login-form');
   const loginElement = document.getElementById('login');
-  const emailElement = document.getElementById('email');
   const passwordElement = document.getElementById('password');
-
   const errorElement = document.getElementById('error');
 
   formElement.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const login = loginElement.value;
-    const email = emailElement.value;
     const password = passwordElement.value;
 
-    api('api/login', 'POST', { login, email, password })
+    await api('api/login', 'POST', { login, password })
       .then((responce) => {
-        if (!responce.status === 'ok') {
-          errorElement.innerText = 'Invalid data';
-        }
         setUserID(responce.token);
-        window.location.href = '/';
+        switchPage('home');
       })
       .catch((error) => {
-        errorElement.innerText = 'Something went wrong';
+        errorElement.innerText = error.message;
       });
   });
 }
@@ -400,6 +391,7 @@ function register() {
 
   formElement.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const login = loginElement.value;
     const email = emailElement.value;
     const password = passwordElement.value;
@@ -407,10 +399,8 @@ function register() {
 
     api('api/register', 'POST', { login, email, password, confirmPassword })
       .then((responce) => {
-        if (!responce.status === 'ok') {
-          errorElement.innerText = 'Invalid data';
-        }
-        window.location.href = '/login';
+        setUserID(responce.token);
+        switchPage('home');
       })
       .catch((error) => {
         errorElement.innerText = 'Something went wrong';

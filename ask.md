@@ -1,5 +1,5 @@
-- SPA
-- login pasword
-- hash (crypto)
-- in csv onlu login users
-- if clietn disconetcted, game not sponig
+- [x] SPA
+- [x] login pasword
+- [x] hash (crypto)
+- [x] in csv onlu login users
+- [x] if clietn disconetcted, game not sponig

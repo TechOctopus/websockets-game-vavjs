@@ -65,14 +65,6 @@ const login = [
           },
           {
             tag: 'input',
-            id: 'email',
-            name: 'email',
-            type: 'email',
-            placeholder: 'Email',
-            required: true,
-          },
-          {
-            tag: 'input',
             id: 'password',
             name: 'password',
             type: 'password',
@@ -99,7 +91,7 @@ const login = [
       },
       {
         tag: 'link',
-        href: '',
+        href: 'home',
         innerText: 'Play without registration',
       },
     ],
@@ -172,7 +164,7 @@ const register = [
       },
       {
         tag: 'link',
-        href: '',
+        href: 'home',
         innerText: 'Play without registration',
       },
     ],
@@ -226,7 +218,7 @@ const notFound = [
 
 export const pageRouter = Router();
 
-pageRouter.get('/', (req, res) => {
+pageRouter.get('/home', (req, res) => {
   res.json(index);
 });
 

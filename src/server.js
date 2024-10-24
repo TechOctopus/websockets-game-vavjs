@@ -5,7 +5,6 @@ import { WebSocketServer } from 'ws';
 import Game from './game.js';
 import { apiRouter } from './routes.js';
 import { pageRouter } from './pages.js';
-import { auth } from './auth.js';
 
 const HTTP_PORT = 8080;
 const WS_PORT = 8082;

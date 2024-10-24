@@ -1,7 +1,7 @@
 // Heorhi Davydau
 import { Router } from 'express';
 import { auth } from './auth.js';
-import { csv } from './csv.js';
+import { store } from './store.js';
 
 export const apiRouter = Router();
 
@@ -21,23 +21,15 @@ apiRouter.get('/logout', (req, res) => {
 apiRouter.post('/login', (req, res) => {
   const password = req.body.password;
   const login = req.body.login;
-  const email = req.body.email;
 
-  if (
-    login === 'none' ||
-    email === 'none' ||
-    password === 'none' ||
-    !login ||
-    !email ||
-    !password
-  ) {
-    return res.status(401).send({ error: 'Invalid data' });
+  if (!login || !password) {
+    return res.status(401).send({ message: 'Invalid data' });
   }
 
-  const token = auth.login(login, email, password);
+  const token = auth.login(login, password);
 
   if (!token) {
-    return res.status(401).send({ error: 'Invalid data' });
+    return res.status(401).send({ message: 'Invalid data' });
   }
 
   res.status(200).send({ token });
@@ -50,10 +42,6 @@ apiRouter.post('/register', (req, res) => {
   const email = req.body.email;
 
   if (
-    login === 'none' ||
-    email === 'none' ||
-    password === 'none' ||
-    confirmPassword === 'none' ||
     !login ||
     !email ||
     !password ||
@@ -63,13 +51,13 @@ apiRouter.post('/register', (req, res) => {
     return res.status(401).send({ error: 'Invalid data' });
   }
 
-  const result = auth.register(login, email, password);
+  const token = auth.register(login, email, password);
 
-  if (!result) {
+  if (!token) {
     return res.status(401).send({ error: 'Invalid data' });
   }
 
-  res.status(200).send({ status: 'ok' });
+  res.status(200).send({ token });
 });
 
 apiRouter.get('/users', (req, res) => {
@@ -78,5 +66,5 @@ apiRouter.get('/users', (req, res) => {
   if (!user || user.login !== 'admin') {
     return res.status(401).send({ error: 'Invalid token' });
   }
-  res.status(200).send(csv.getUsers());
+  res.status(200).send(store.getUsers());
 });
