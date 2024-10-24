@@ -6,36 +6,34 @@ const mid = {
   y: Math.floor(yFields / 2),
 };
 
-function resetUserID() {
+const rootElement = document.body;
+
+function removeUserToken() {
   localStorage.removeItem('user');
 }
 
-function setUserID(userID) {
-  localStorage.setItem('user', userID);
+function setUserToken(userToken) {
+  localStorage.setItem('user', userToken);
 }
 
-function getUserID() {
-  const userID = localStorage.getItem('user');
-  if (userID) return userID;
-  const newUserID = crypto.randomUUID();
-  localStorage.setItem('user', newUserID);
-  return newUserID;
+function getUserToken() {
+  const userToken = localStorage.getItem('user');
+  if (userToken) return userToken;
+  const newUserToken = crypto.randomUUID();
+  localStorage.setItem('user', newUserToken);
+  return newUserToken;
 }
-
-const userID = getUserID();
-
-const root = document.body;
 
 async function api(endpoint, method = 'GET', body = {}) {
   const options = {
     method,
     headers: {
       'Content-Type': 'application/json',
+      Authorization: getUserToken(),
     },
   };
 
   if (method !== 'GET') options.body = JSON.stringify(body);
-  if (userID) options.headers.Authorization = userID;
 
   return await fetch(endpoint, options)
     .then((response) => {
@@ -50,6 +48,7 @@ async function api(endpoint, method = 'GET', body = {}) {
 }
 
 function renderTag(data) {
+  // Special case for links to switch pages
   if (data.tag === 'link') {
     const link = document.createElement('button');
     link.style = `
@@ -86,21 +85,11 @@ function renderTag(data) {
   return tag;
 }
 
-function render(data) {
-  data.forEach((element) => {
-    root.appendChild(renderTag(element));
-  });
-}
-
-function getPath() {
-  return window.location.pathname;
-}
-
 async function renderPage(page) {
   await api(`page/${page}`).then((data) => {
-    root.innerHTML = '';
+    rootElement.innerHTML = '';
     data.forEach((element) => {
-      root.appendChild(renderTag(element));
+      rootElement.appendChild(renderTag(element));
     });
   });
 }
@@ -108,33 +97,190 @@ async function renderPage(page) {
 async function switchPage(page = 'home') {
   console.log('page', page);
   await renderPage(page);
+
+  // TODO: remove event listeners
+
   switch (page) {
     case 'admin':
-      admin();
+      adminPageLogic();
       break;
     case 'login':
-      login();
+      loginPageLogic();
       break;
     case 'register':
-      register();
+      registerPageLogic();
       break;
     case 'home':
-      index();
+      gamePageLogic();
       break;
     default:
-      index();
+      gamePageLogic();
   }
 }
 
 switchPage();
 
-function game() {
-  async function rotateShip(direction) {
-    await api('api/rotate', 'POST', { direction });
+// Pages logic
+
+function adminPageLogic() {
+  const usersTableElement = document.getElementById('users-table');
+  api('api/users')
+    .then((responce) => {
+      responce.forEach((user) => {
+        const rowElement = document.createElement('tr');
+        const loginElement = document.createElement('td');
+        const emailElement = document.createElement('td');
+        const scoreElement = document.createElement('td');
+        const speedElement = document.createElement('td');
+        const deleteElement = document.createElement('td');
+
+        loginElement.innerText = user.login;
+        emailElement.innerText = user.email;
+        scoreElement.innerText = user.maxScore;
+        speedElement.innerText = user.maxSpeed;
+
+        const deleteButtonElement = document.createElement('button');
+        deleteButtonElement.innerText = 'Delete';
+        deleteButtonElement.addEventListener('click', () => {
+          api('api/delete', 'POST', {
+            login: user.login,
+            email: user.email,
+          });
+          switchPage('admin');
+        });
+
+        deleteElement.appendChild(deleteButtonElement);
+
+        rowElement.appendChild(loginElement);
+        rowElement.appendChild(emailElement);
+        rowElement.appendChild(scoreElement);
+        rowElement.appendChild(speedElement);
+        rowElement.appendChild(deleteElement);
+
+        usersTableElement.appendChild(rowElement);
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+function loginPageLogic() {
+  const formElement = document.getElementById('login-form');
+  const loginElement = document.getElementById('login');
+  const passwordElement = document.getElementById('password');
+  const errorElement = document.getElementById('error');
+
+  formElement.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const login = loginElement.value;
+    const password = passwordElement.value;
+
+    api('api/login', 'POST', { login, password })
+      .then((responce) => {
+        setUserToken(responce.token);
+        switchPage('home');
+      })
+      .catch((error) => {
+        errorElement.innerText = error.message;
+      });
+  });
+}
+
+function registerPageLogic() {
+  const formElement = document.getElementById('register-form');
+  const loginElement = document.getElementById('login');
+  const emailElement = document.getElementById('email');
+  const passwordElement = document.getElementById('password');
+  const confirmPasswordElement = document.getElementById('password_confirm');
+
+  const errorElement = document.getElementById('error');
+
+  function validatePassword() {
+    if (passwordElement.value !== confirmPasswordElement.value) {
+      confirmPasswordElement.setCustomValidity('Passwords do not match');
+    } else {
+      confirmPasswordElement.setCustomValidity('');
+    }
   }
 
-  async function addLaser() {
-    await api('api/laser', 'POST');
+  passwordElement.addEventListener('input', validatePassword);
+  confirmPasswordElement.addEventListener('input', validatePassword);
+
+  formElement.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const login = loginElement.value;
+    const email = emailElement.value;
+    const password = passwordElement.value;
+    const confirmPassword = confirmPasswordElement.value;
+
+    api('api/register', 'POST', { login, email, password, confirmPassword })
+      .then((responce) => {
+        setUserToken(responce.token);
+        switchPage('home');
+      })
+      .catch((error) => {
+        errorElement.innerText = 'Something went wrong';
+      });
+  });
+}
+
+function gamePageLogic() {
+  const userElement = document.getElementById('user');
+
+  let user = null;
+
+  api('api/auth')
+    .then((responce) => {
+      user = responce.user;
+
+      const logoutBtnElement = document.createElement('button');
+      logoutBtnElement.innerText = 'Logout';
+      logoutBtnElement.addEventListener('click', async () => {
+        api('api/logout');
+        removeUserToken();
+        switchPage('login');
+      });
+
+      const newUserElement = document.createElement('p');
+      newUserElement.innerText = `
+        User: ${user.login}
+        Max score: ${user.maxScore}
+        Max speed: ${user.maxSpeed}
+      `;
+
+      userElement.innerHTML = '';
+      userElement.appendChild(logoutBtnElement);
+      userElement.appendChild(newUserElement);
+
+      if (user.login === 'admin') {
+        const adminLinkElement = document.createElement('button');
+        adminLinkElement.innerText = 'Admin';
+        adminLinkElement.addEventListener('click', async () => {
+          switchPage('admin');
+        });
+
+        userElement.appendChild(adminLinkElement);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
+  game();
+}
+
+// Game logic
+
+function game() {
+  function rotateShip(direction) {
+    api('api/rotate', 'POST', { direction });
+  }
+
+  function addLaser() {
+    api('api/laser', 'POST');
   }
 
   window.addEventListener('keydown', async (ev) => {
@@ -246,7 +392,7 @@ function game() {
     ws.send(
       JSON.stringify({
         type: 'connect',
-        userID,
+        userID: getUserToken(),
       }),
     );
   });
@@ -265,145 +411,5 @@ function game() {
     displayMissiles();
     displayLasers();
     displayInfo();
-  });
-}
-
-async function index() {
-  const userElement = document.getElementById('user');
-
-  let user = null;
-
-  await api('api/auth')
-    .then((responce) => {
-      user = responce.user;
-
-      const logoutBtnElement = document.createElement('button');
-      logoutBtnElement.innerText = 'Logout';
-      logoutBtnElement.addEventListener('click', async () => {
-        await api('api/logout');
-        resetUserID();
-        window.location.href = '/';
-      });
-
-      const newUserElement = document.createElement('p');
-      newUserElement.innerText = `
-        User: ${user.login}
-        Max score: ${user.maxScore}
-        Max speed: ${user.maxSpeed}
-      `;
-
-      userElement.innerHTML = '';
-      userElement.appendChild(logoutBtnElement);
-      userElement.appendChild(newUserElement);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-  game();
-}
-
-async function admin() {
-  const usersTableElement = document.getElementById('users-table');
-  await api('api/users')
-    .then((responce) => {
-      responce.users.forEach((user) => {
-        const rowElement = document.createElement('tr');
-        const loginElement = document.createElement('td');
-        const emailElement = document.createElement('td');
-        const scoreElement = document.createElement('td');
-        const speedElement = document.createElement('td');
-        const deleteElement = document.createElement('td');
-
-        loginElement.innerText = user.login;
-        emailElement.innerText = user.email;
-        scoreElement.innerText = user.maxScore;
-        speedElement.innerText = user.maxSpeed;
-
-        const deleteButtonElement = document.createElement('button');
-        deleteButtonElement.innerText = 'Delete';
-        deleteButtonElement.addEventListener('click', async () => {
-          await api('api/delete', 'POST', {
-            login: user.login,
-            email: user.email,
-          });
-          window.location.href = '/admin';
-        });
-
-        deleteElement.appendChild(deleteButtonElement);
-
-        rowElement.appendChild(loginElement);
-        rowElement.appendChild(emailElement);
-        rowElement.appendChild(scoreElement);
-        rowElement.appendChild(speedElement);
-        rowElement.appendChild(deleteElement);
-
-        usersTableElement.appendChild(rowElement);
-      });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-}
-
-function login() {
-  const formElement = document.getElementById('login-form');
-  const loginElement = document.getElementById('login');
-  const passwordElement = document.getElementById('password');
-  const errorElement = document.getElementById('error');
-
-  formElement.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const login = loginElement.value;
-    const password = passwordElement.value;
-
-    await api('api/login', 'POST', { login, password })
-      .then((responce) => {
-        setUserID(responce.token);
-        switchPage('home');
-      })
-      .catch((error) => {
-        errorElement.innerText = error.message;
-      });
-  });
-}
-
-function register() {
-  const formElement = document.getElementById('register-form');
-  const loginElement = document.getElementById('login');
-  const emailElement = document.getElementById('email');
-  const passwordElement = document.getElementById('password');
-  const confirmPasswordElement = document.getElementById('password_confirm');
-
-  const errorElement = document.getElementById('error');
-
-  function validatePassword() {
-    if (passwordElement.value !== confirmPasswordElement.value) {
-      confirmPasswordElement.setCustomValidity('Passwords do not match');
-    } else {
-      confirmPasswordElement.setCustomValidity('');
-    }
-  }
-
-  passwordElement.addEventListener('input', validatePassword);
-  confirmPasswordElement.addEventListener('input', validatePassword);
-
-  formElement.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const login = loginElement.value;
-    const email = emailElement.value;
-    const password = passwordElement.value;
-    const confirmPassword = confirmPasswordElement.value;
-
-    api('api/register', 'POST', { login, email, password, confirmPassword })
-      .then((responce) => {
-        setUserID(responce.token);
-        switchPage('home');
-      })
-      .catch((error) => {
-        errorElement.innerText = 'Something went wrong';
-      });
   });
 }

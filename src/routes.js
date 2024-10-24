@@ -60,6 +60,24 @@ apiRouter.post('/register', (req, res) => {
   res.status(200).send({ token });
 });
 
+apiRouter.post('/delete', (req, res) => {
+  const token = req.headers.authorization;
+  const user = auth.getUser(token);
+  if (!user || user.login !== 'admin') {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+
+  const login = req.body.login;
+  const email = req.body.email;
+
+  if (!login || !email) {
+    return res.status(401).send({ error: 'Invalid data' });
+  }
+
+  store.deleteUser(login, email);
+  res.status(200).send({ status: 'ok' });
+});
+
 apiRouter.get('/users', (req, res) => {
   const token = req.headers.authorization;
   const user = auth.getUser(token);

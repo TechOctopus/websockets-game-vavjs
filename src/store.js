@@ -98,6 +98,13 @@ class Store {
     return true;
   }
 
+  deleteUser(login, email) {
+    this.users = this.users.filter(
+      (user) => user.login !== login && user.email !== email,
+    );
+    this.saveCSV();
+  }
+
   updateUserStats(login, maxScore, maxSpeed) {
     const user = this.users.find((user) => user.login === login);
     if (user.maxScore < maxScore || user.maxScore === 'none') {
@@ -110,7 +117,14 @@ class Store {
   }
 
   getUsers() {
-    return this.users;
+    return this.users.map((user) => {
+      return {
+        login: user.login,
+        email: user.email,
+        maxScore: user.maxScore,
+        maxSpeed: user.maxSpeed,
+      };
+    });
   }
 }
 

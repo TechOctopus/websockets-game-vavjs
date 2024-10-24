@@ -177,6 +177,11 @@ const admin = [
     innerText: 'Admin',
   },
   {
+    tag: 'link',
+    to: 'home',
+    innerText: 'Game',
+  },
+  {
     tag: 'table',
     id: 'users-table',
     innerHtml: [
