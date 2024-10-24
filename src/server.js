@@ -52,10 +52,9 @@ wss.on('connection', function connection(ws) {
   ws.on('message', (data) => {
     const message = JSON.parse(data);
     const userID = message.userID;
-    const user = auth.getUser(userID);
 
     if (!games[userID]) {
-      games[userID] = new Game(user, ws);
+      games[userID] = new Game(ws);
       games[userID].preGame();
     }
   });

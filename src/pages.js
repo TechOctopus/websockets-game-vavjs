@@ -8,16 +8,16 @@ const index = [
     id: 'user',
     innerHtml: [
       {
-        tag: 'a',
-        href: '/login',
+        tag: 'link',
+        to: 'login',
         innerText: 'Login',
       },
       {
         tag: 'br',
       },
       {
-        tag: 'a',
-        href: '/register',
+        tag: 'link',
+        to: 'register',
         innerText: 'Register',
       },
     ],
@@ -93,13 +93,13 @@ const login = [
         innerText: '',
       },
       {
-        tag: 'a',
-        href: '/register',
+        tag: 'link',
+        to: 'register',
         innerText: "Don't have an account?",
       },
       {
-        tag: 'a',
-        href: '/',
+        tag: 'link',
+        href: '',
         innerText: 'Play without registration',
       },
     ],
@@ -166,13 +166,13 @@ const register = [
         innerText: '',
       },
       {
-        tag: 'a',
-        href: '/login',
+        tag: 'link',
+        to: 'login',
         innerText: 'Already have an account?',
       },
       {
-        tag: 'a',
-        href: '/',
+        tag: 'link',
+        href: '',
         innerText: 'Play without registration',
       },
     ],

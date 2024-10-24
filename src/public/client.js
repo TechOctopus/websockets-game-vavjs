@@ -47,7 +47,22 @@ async function api(endpoint, method = 'GET', body = {}) {
 }
 
 function renderTag(data) {
+  if (data.tag === 'link') {
+    const link = document.createElement('button');
+    link.style = `
+      background: none;
+      border: none;
+      color: blue;
+      cursor: pointer;
+      text-decoration: underline;
+    `;
+    link.addEventListener('click', async () => await switchPage(data.to));
+    link.innerText = data.innerText;
+    return link;
+  }
+
   const tag = document.createElement(data.tag);
+
   if (data.id) tag.id = data.id;
   if (data.style) tag.style = data.style;
   if (data.width) tag.width = data.width;
@@ -78,30 +93,34 @@ function getPath() {
   return window.location.pathname;
 }
 
-const pagePath = getPath();
-const data = await api(`page/${pagePath}`);
-render(data);
-
-switch (pagePath) {
-  case '/': {
-    index();
-    break;
-  }
-  case '/login': {
-    login();
-    break;
-  }
-  case '/register': {
-    register();
-    break;
-  }
-  case '/admin': {
-    admin();
-    break;
-  }
-  default:
-    break;
+async function renderPage(page) {
+  await api(`page/${page}`).then((data) => {
+    root.innerHTML = '';
+    data.forEach((element) => {
+      root.appendChild(renderTag(element));
+    });
+  });
 }
+
+async function switchPage(page = '') {
+  console.log('page', page);
+  await renderPage(page);
+  switch (page) {
+    case 'admin':
+      admin();
+      break;
+    case 'login':
+      login();
+      break;
+    case 'register':
+      register();
+      break;
+    default:
+      index();
+  }
+}
+
+switchPage();
 
 function game() {
   async function rotateShip(direction) {
@@ -244,46 +263,46 @@ function game() {
 }
 
 async function index() {
-  const userElement = document.getElementById('user');
+  // const userElement = document.getElementById('user');
 
-  let user = null;
+  // let user = null;
 
-  await api('api/auth')
-    .then((responce) => {
-      user = responce.user;
+  // await api('api/auth')
+  //   .then((responce) => {
+  //     user = responce.user;
 
-      if (user.login === 'none') {
-        const newUserElement = document.createElement('p');
-        newUserElement.innerText = `
-          Max score: ${user.maxScore}
-          Max speed: ${user.maxSpeed}
-        `;
-        userElement.appendChild(newUserElement);
-        return;
-      }
+  //     if (user.login === 'none') {
+  //       const newUserElement = document.createElement('p');
+  //       newUserElement.innerText = `
+  //         Max score: ${user.maxScore}
+  //         Max speed: ${user.maxSpeed}
+  //       `;
+  //       userElement.appendChild(newUserElement);
+  //       return;
+  //     }
 
-      const logoutBtnElement = document.createElement('button');
-      logoutBtnElement.innerText = 'Logout';
-      logoutBtnElement.addEventListener('click', async () => {
-        await api('api/logout');
-        resetUserID();
-        window.location.href = '/';
-      });
+  //     const logoutBtnElement = document.createElement('button');
+  //     logoutBtnElement.innerText = 'Logout';
+  //     logoutBtnElement.addEventListener('click', async () => {
+  //       await api('api/logout');
+  //       resetUserID();
+  //       window.location.href = '/';
+  //     });
 
-      const newUserElement = document.createElement('p');
-      newUserElement.innerText = `
-        User: ${user.login}
-        Max score: ${user.maxScore}
-        Max speed: ${user.maxSpeed}
-      `;
+  //     const newUserElement = document.createElement('p');
+  //     newUserElement.innerText = `
+  //       User: ${user.login}
+  //       Max score: ${user.maxScore}
+  //       Max speed: ${user.maxSpeed}
+  //     `;
 
-      userElement.innerHTML = '';
-      userElement.appendChild(logoutBtnElement);
-      userElement.appendChild(newUserElement);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+  //     userElement.innerHTML = '';
+  //     userElement.appendChild(logoutBtnElement);
+  //     userElement.appendChild(newUserElement);
+  //   })
+  //   .catch((error) => {
+  //     console.error(error);
+  //   });
 
   game();
 }
