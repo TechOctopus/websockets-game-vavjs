@@ -80,6 +80,8 @@ function renderTag(data) {
   if (data.required) tag.required = data.required;
   if (data.href) tag.href = data.href;
   if (data.innerText) tag.innerText = data.innerText;
+  if (data.maxLength) tag.maxLength = data.maxLength;
+  if (data.minLength) tag.minLength = data.minLength;
   if (data.innerHtml) {
     data.innerHtml.forEach((element) => {
       tag.appendChild(renderTag(element));
