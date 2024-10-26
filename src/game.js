@@ -14,6 +14,11 @@ function random(min, max) {
 export default class Game {
   constructor(ws) {
     this.ws = ws;
+    this.init();
+    this.preGame();
+  }
+
+  init() {
     this.xShip = mid.x;
     this.yShip = mid.y;
     this.rShip = 0;
@@ -233,6 +238,13 @@ export default class Game {
     }, (countdown + 1) * 1000);
   }
 
+  restart() {
+    this.endGame();
+    this.init();
+    this.sendGameState();
+    this.preGame();
+  }
+
   sendGameState() {
     this.ws.send(
       JSON.stringify({
@@ -247,7 +259,8 @@ export default class Game {
     );
   }
 
-  getGameWSocket() {
-    return this.ws;
+  updateWs(ws) {
+    this.ws = ws;
+    this.sendGameState();
   }
 }

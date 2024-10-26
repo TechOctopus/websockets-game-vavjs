@@ -12,7 +12,7 @@ const WS_PORT = 8082;
 const app = express();
 const wss = new WebSocketServer({ port: WS_PORT });
 
-const games = {};
+const games = new Map();
 
 app.use((req, res, next) => {
   console.log(`Request: ${req.method} ${req.url}`);
@@ -22,27 +22,29 @@ app.use((req, res, next) => {
 app.use(express.static('src/public'));
 app.use(express.json());
 
+app.use('/api', apiRouter);
+app.use('/page', pageRouter);
+
+app.listen(HTTP_PORT, () => {
+  console.log(`Server running at http://localhost:${HTTP_PORT}/`);
+});
+
 app.post('/api/rotate', (req, res) => {
   const userID = req.headers.authorization;
-  if (games[userID]) games[userID].rotateShip(req.body.direction);
+  if (games.has(userID)) games.get(userID).rotateShip(req.body.direction);
   res.status(200).send({ status: 'ok' });
 });
 
 app.post('/api/laser', (req, res) => {
   const userID = req.headers.authorization;
-  if (games[userID]) games[userID].addLaser();
+  if (games.has(userID)) games.get(userID).addLaser();
   res.status(200).send({ status: 'ok' });
 });
 
-app.use('/api', apiRouter);
-app.use('/page', pageRouter);
-
-app.get('/*', (req, res) => {
-  res.sendFile('src/public/index.html', { root: '.' });
-});
-
-app.listen(HTTP_PORT, () => {
-  console.log(`Server running at http://localhost:${HTTP_PORT}/`);
+app.post('/api/restart', (req, res) => {
+  const userID = req.headers.authorization;
+  if (games.has(userID)) games.get(userID).restart();
+  res.status(200).send({ status: 'ok' });
 });
 
 wss.on('connection', function connection(ws) {
@@ -52,31 +54,18 @@ wss.on('connection', function connection(ws) {
     const message = JSON.parse(data);
     const userID = message.userID;
 
-    if (!games[userID]) {
-      games[userID] = new Game(ws);
-      games[userID].preGame();
+    if (!games.has(userID)) {
+      games.set(userID, new Game(ws));
+    } else {
+      games.get(userID).updateWs(ws);
     }
   });
 
   ws.on('close', () => {
     console.log('disconnected');
-    const userID = Object.keys(games).find(
-      (key) => games[key].getGameWSocket() === ws,
-    );
-    if (userID) {
-      games[userID].endGame();
-      delete games[userID];
-    }
   });
 
   ws.on('error', (err) => {
     console.error(err);
-    const userID = Object.keys(games).find(
-      (key) => games[key].getGameWSocket() === ws,
-    );
-    if (userID) {
-      games[userID].endGame();
-      delete games[userID];
-    }
   });
 });

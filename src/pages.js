@@ -39,6 +39,14 @@ const index = [
     id: 'game',
     style: 'border: 1px solid black;',
   },
+  {
+    tag: 'br',
+  },
+  {
+    tag: 'button',
+    id: 'restart',
+    innerText: 'Restart',
+  },
 ];
 
 const login = [

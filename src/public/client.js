@@ -95,10 +95,8 @@ async function renderPage(page) {
 }
 
 async function switchPage(page = 'home') {
-  console.log('page', page);
   await renderPage(page);
-
-  // TODO: remove event listeners
+  window.removeEventListener('keydown', handleKeyInput);
 
   switch (page) {
     case 'admin':
@@ -269,25 +267,31 @@ function gamePageLogic() {
       console.error(error);
     });
 
+  const restartGameButtonElement = document.getElementById('restart');
+  restartGameButtonElement.addEventListener('click', () =>
+    api('api/restart', 'POST'),
+  );
+
   game();
 }
 
 // Game logic
+function rotateShip(direction) {
+  api('api/rotate', 'POST', { direction });
+}
+
+function addLaser() {
+  api('api/laser', 'POST');
+}
+
+function handleKeyInput(ev) {
+  if (ev.code === 'ArrowLeft' || ev.code === 'keyA') rotateShip(-1);
+  else if (ev.code === 'ArrowRight' || ev.code === 'keyA') rotateShip(1);
+  else if (ev.code === 'Space') addLaser();
+}
 
 function game() {
-  function rotateShip(direction) {
-    api('api/rotate', 'POST', { direction });
-  }
-
-  function addLaser() {
-    api('api/laser', 'POST');
-  }
-
-  window.addEventListener('keydown', async (ev) => {
-    if (ev.code === 'ArrowLeft') await rotateShip(-1);
-    else if (ev.code === 'ArrowRight') await rotateShip(1);
-    else if (ev.code === 'Space') await addLaser();
-  });
+  window.addEventListener('keydown', handleKeyInput);
 
   const CELLSIZE = 10;
 
