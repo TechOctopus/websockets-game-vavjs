@@ -8,6 +8,7 @@ const mid = {
 
 const shipVariants = ['white', 'orange', 'purple'];
 let shipVariant = 'white';
+let gameWatchToken = undefined;
 
 const rootElement = document.body;
 
@@ -112,6 +113,9 @@ async function switchPage(page = 'home') {
       break;
     case 'register':
       registerPageLogic();
+      break;
+    case 'watch':
+      watchPageLogic();
       break;
     case 'home':
       gamePageLogic();
@@ -230,6 +234,10 @@ function registerPageLogic() {
   });
 }
 
+function watchPageLogic() {
+  console.log('watch game with token:', gameWatchToken);
+}
+
 function gamePageLogic() {
   const userElement = document.getElementById('user');
 
@@ -300,6 +308,31 @@ function gamePageLogic() {
   restartGameButtonElement.addEventListener('click', () => {
     api('api/restart', 'POST');
     updateStatistics();
+  });
+
+  const gamesTableElement = document.getElementById('games-table');
+
+  api('api/games').then((games) => {
+    games.forEach((game) => {
+      const rowElement = document.createElement('tr');
+      const userElement = document.createElement('td');
+      const watchElement = document.createElement('td');
+
+      userElement.innerText = game.user;
+
+      const watchButtonElement = document.createElement('button');
+      watchButtonElement.innerText = 'Watch';
+      watchButtonElement.addEventListener('click', () => {
+        gameWatchToken = game.token;
+        switchPage('watch');
+      });
+      watchElement.appendChild(watchButtonElement);
+
+      rowElement.appendChild(userElement);
+      rowElement.appendChild(watchElement);
+
+      gamesTableElement.appendChild(rowElement);
+    });
   });
 
   game();

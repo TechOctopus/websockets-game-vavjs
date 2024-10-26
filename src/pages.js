@@ -63,6 +63,25 @@ const index = [
           },
         ],
       },
+      {
+        tag: 'table',
+        id: 'games-table',
+        innerHtml: [
+          {
+            tag: 'tr',
+            innerHtml: [
+              {
+                tag: 'th',
+                innerText: 'Login',
+              },
+              {
+                tag: 'th',
+                innerText: 'Online',
+              },
+            ],
+          },
+        ],
+      },
     ],
   },
 ];
@@ -253,6 +272,31 @@ const notFound = [
   },
 ];
 
+const watch = [
+  {
+    tag: 'section',
+    innerHtml: [
+      {
+        tag: 'h1',
+        innerText: 'Watch',
+      },
+      {
+        tag: 'canvas',
+        width: '580',
+        height: '580',
+        id: 'game',
+        style: 'border: 1px solid black;',
+      },
+      { tag: 'br' },
+      {
+        tag: 'link',
+        to: 'home',
+        innerText: 'Game',
+      },
+    ],
+  },
+];
+
 export const pageRouter = Router();
 
 pageRouter.get('/home', (req, res) => {
@@ -274,6 +318,6 @@ pageRouter.get('/admin', (req, res) => {
   res.json(admin);
 });
 
-pageRouter.get('/*', (req, res) => {
-  res.json(notFound);
+pageRouter.get('/watch', (req, res) => {
+  res.json(watch);
 });

@@ -24,7 +24,7 @@ Cielom ulohy bude prepisat predoslu hru z client-side verzie na server-side verz
 | 12    |        | import a export CSV udajov pouzivatelov (meno, email, heslo, max score, max rychlost) len pre pouzivatela "admin"  | 1    |
 | 13    | x      | vyuzitie objektovej reprezentacie struktury stranky                                                                | 1    |
 | 14    | x      | server vracia staticky obsah (index.html, js subory), vsetka ostatna komunikacia (plocha, interakcia) pouziva JSON | 1    |
-| 15    |        | kontrola vstupov (email, login, heslo)                                                                             | 1    |
+| 15    | x      | kontrola vstupov (email, login, heslo)                                                                             | 1    |
 
 SUM 15
 

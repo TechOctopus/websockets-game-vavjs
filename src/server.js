@@ -149,6 +149,20 @@ app.get('/api/statistics', (req, res) => {
   });
 });
 
+app.get('/api/games', (req, res) => {
+  const tokens = Array.from(games.keys());
+
+  const usersTokens = tokens.map((token) => {
+    const user = auth.getUser(token);
+    return {
+      user: user ? user.login : 'null',
+      token,
+    };
+  });
+
+  res.json(usersTokens);
+});
+
 wss.on('connection', function connection(ws) {
   console.log(`WebSocket connected: ${ws.protocol}`);
 
