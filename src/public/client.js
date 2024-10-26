@@ -1,4 +1,6 @@
 // Heorhi Davydau
+import { v4 as uuidv4 } from 'https://cdn.jsdelivr.net/npm/uuid@10.0.0/+esm';
+
 const xFields = 59;
 const yFields = 59;
 const mid = {
@@ -23,7 +25,14 @@ function setUserToken(userToken) {
 function getUserToken() {
   const userToken = localStorage.getItem('user');
   if (userToken) return userToken;
-  const newUserToken = crypto.randomUUID();
+
+  let newUserToken;
+  if (!crypto.randomUUID) {
+    newUserToken = uuidv4();
+  } else {
+    newUserToken = crypto.randomUUID();
+  }
+
   localStorage.setItem('user', newUserToken);
   return newUserToken;
 }
