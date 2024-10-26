@@ -5,47 +5,65 @@ import { auth } from './auth.js';
 const index = [
   {
     tag: 'section',
-    id: 'user',
     innerHtml: [
       {
-        tag: 'link',
-        to: 'login',
-        innerText: 'Login',
+        tag: 'div',
+        id: 'user',
+        innerHtml: [
+          {
+            tag: 'link',
+            to: 'login',
+            innerText: 'Login',
+          },
+          {
+            tag: 'br',
+          },
+          {
+            tag: 'link',
+            to: 'register',
+            innerText: 'Register',
+          },
+        ],
       },
       {
-        tag: 'br',
+        tag: 'p',
+        id: 'score',
+        innerText: 'Score: 0',
       },
       {
-        tag: 'link',
-        to: 'register',
-        innerText: 'Register',
+        tag: 'p',
+        id: 'speed',
+        innerText: 'Speed: 1000',
+      },
+      {
+        tag: 'p',
+        id: 'max-score',
+        innerText: 'Max score: 0',
+      },
+      {
+        tag: 'p',
+        id: 'max-speed',
+        innerText: 'Max speed: 1000',
+      },
+      {
+        tag: 'canvas',
+        width: '580',
+        height: '580',
+        id: 'game',
+        style: 'border: 1px solid black;',
+      },
+      { tag: 'br' },
+      {
+        tag: 'div',
+        innerHtml: [
+          {
+            tag: 'button',
+            id: 'restart',
+            innerText: 'Restart',
+          },
+        ],
       },
     ],
-  },
-  {
-    tag: 'p',
-    id: 'score',
-    innerText: 'Score: 0',
-  },
-  {
-    tag: 'p',
-    id: 'speed',
-    innerText: 'Speed: 1000',
-  },
-  {
-    tag: 'canvas',
-    width: '580',
-    height: '580',
-    id: 'game',
-    style: 'border: 1px solid black;',
-  },
-  {
-    tag: 'br',
-  },
-  {
-    tag: 'button',
-    id: 'restart',
-    innerText: 'Restart',
   },
 ];
 

@@ -33,7 +33,7 @@ class Auth {
   }
 
   getUser(token) {
-    return this.users.get(token) || this.users.get('admin');
+    return this.users.get(token);
   }
 }
 

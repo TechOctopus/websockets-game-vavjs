@@ -29,7 +29,19 @@ const MAX_SPEED_FIELD = index++;
 
 class Store {
   constructor() {
-    this.users = this.readAndParseCSV();
+    this.users = this.init();
+  }
+
+  init() {
+    return [
+      {
+        login: 'admin',
+        email: 'admin@gmail.com',
+        password: hash('admin'),
+        maxScore: 'none',
+        maxSpeed: 'none',
+      },
+    ];
   }
 
   readAndParseCSV() {
@@ -93,7 +105,6 @@ class Store {
       maxScore,
       maxSpeed,
     });
-    this.saveCSV();
 
     return true;
   }
@@ -102,18 +113,30 @@ class Store {
     this.users = this.users.filter(
       (user) => user.login !== login && user.email !== email,
     );
-    this.saveCSV();
   }
 
-  updateUserStats(login, maxScore, maxSpeed) {
-    const user = this.users.find((user) => user.login === login);
-    if (user.maxScore < maxScore || user.maxScore === 'none') {
-      user.maxScore = maxScore;
-    }
-    if (user.maxSpeed < maxSpeed || user.maxSpeed === 'none') {
-      user.maxSpeed = maxSpeed;
-    }
-    this.saveCSV();
+  setUserMaxScore(userToUpdate, maxScore) {
+    this.users.forEach((user) => {
+      if (user.login === userToUpdate.login) {
+        user.maxScore = maxScore;
+      }
+    });
+  }
+
+  setUserMaxSpeed(userToUpdate, maxSpeed) {
+    this.users.forEach((user) => {
+      if (user.login === userToUpdate.login) {
+        user.maxSpeed = maxSpeed;
+      }
+    });
+  }
+
+  getUserMaxScore(userToFind) {
+    return this.users.find((user) => user.login === userToFind.login).maxScore;
+  }
+
+  getUserMaxSpeed(userToFind) {
+    return this.users.find((user) => user.login === userToFind.login).maxSpeed;
   }
 
   getUsers() {

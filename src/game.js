@@ -1,4 +1,6 @@
 // Heorhi Davydau
+import { store } from './store.js';
+
 const xFields = 59;
 const yFields = 59;
 const fields = 59;
@@ -12,8 +14,18 @@ function random(min, max) {
 }
 
 export default class Game {
-  constructor(ws) {
+  constructor(ws, user) {
     this.ws = ws;
+    this.user = user;
+
+    if (this.user) {
+      this.maxScore = store.getUserMaxScore(this.user);
+      this.maxSpeed = store.getUserMaxSpeed(this.user);
+    } else {
+      this.maxScore = 'none';
+      this.maxSpeed = 'none';
+    }
+
     this.init();
     this.preGame();
   }
@@ -207,6 +219,21 @@ export default class Game {
   }
 
   endGame() {
+    if (this.score > this.maxScore || this.maxScore === 'none') {
+      if (this.user) {
+        store.setUserMaxScore(this.user, this.score);
+      }
+      this.maxScore = this.score;
+    }
+
+    if (this.speed < this.maxSpeed || this.maxSpeed === 'none') {
+      if (this.user) {
+        store.setUserMaxSpeed(this.user, this.speed);
+      }
+      this.maxSpeed = this.speed;
+    }
+
+    console.log('Game Over');
     clearInterval(this.ival);
     this.ival = null;
   }
@@ -239,13 +266,14 @@ export default class Game {
   }
 
   restart() {
-    this.endGame();
+    clearInterval(this.ival);
     this.init();
     this.sendGameState();
     this.preGame();
   }
 
   sendGameState() {
+    if (!this.ws) return;
     this.ws.send(
       JSON.stringify({
         xShip: this.xShip,
@@ -260,6 +288,7 @@ export default class Game {
   }
 
   updateWs(ws) {
+    console.log('Updating ws');
     this.ws = ws;
     this.sendGameState();
   }

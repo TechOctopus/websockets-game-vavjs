@@ -228,11 +228,13 @@ function registerPageLogic() {
 function gamePageLogic() {
   const userElement = document.getElementById('user');
 
-  let user = null;
-
   api('api/auth')
     .then((responce) => {
-      user = responce.user;
+      const user = responce.user;
+
+      if (!user) {
+        return;
+      }
 
       const logoutBtnElement = document.createElement('button');
       logoutBtnElement.innerText = 'Logout';
@@ -245,8 +247,6 @@ function gamePageLogic() {
       const newUserElement = document.createElement('p');
       newUserElement.innerText = `
         User: ${user.login}
-        Max score: ${user.maxScore}
-        Max speed: ${user.maxSpeed}
       `;
 
       userElement.innerHTML = '';
@@ -268,14 +268,26 @@ function gamePageLogic() {
     });
 
   const restartGameButtonElement = document.getElementById('restart');
-  restartGameButtonElement.addEventListener('click', () =>
-    api('api/restart', 'POST'),
-  );
+  restartGameButtonElement.addEventListener('click', () => {
+    api('api/restart', 'POST');
+    updateStatistics();
+  });
 
   game();
+  updateStatistics();
 }
 
 // Game logic
+function updateStatistics() {
+  const maxScoreElement = document.getElementById('max-score');
+  const maxSpeedElement = document.getElementById('max-speed');
+
+  api('api/statistics').then((data) => {
+    maxScoreElement.innerText = `Max score: ${data.maxScore}`;
+    maxSpeedElement.innerText = `Max speed: ${data.maxSpeed}`;
+  });
+}
+
 function rotateShip(direction) {
   api('api/rotate', 'POST', { direction });
 }
@@ -285,8 +297,8 @@ function addLaser() {
 }
 
 function handleKeyInput(ev) {
-  if (ev.code === 'ArrowLeft' || ev.code === 'keyA') rotateShip(-1);
-  else if (ev.code === 'ArrowRight' || ev.code === 'keyA') rotateShip(1);
+  if (ev.code === 'ArrowLeft' || ev.code === 'KeyA') rotateShip(-1);
+  else if (ev.code === 'ArrowRight' || ev.code === 'KeyD') rotateShip(1);
   else if (ev.code === 'Space') addLaser();
 }
 
@@ -389,17 +401,7 @@ function game() {
     scoreElement.innerText = `Score: ${score}`;
   }
 
-  const ws = new WebSocket('ws://localhost:8082');
-
-  ws.addEventListener('open', () => {
-    console.log('Connected to server');
-    ws.send(
-      JSON.stringify({
-        type: 'connect',
-        userID: getUserToken(),
-      }),
-    );
-  });
+  const ws = new WebSocket('ws://localhost:8082', getUserToken());
 
   ws.addEventListener('message', (event) => {
     const data = JSON.parse(event.data);
