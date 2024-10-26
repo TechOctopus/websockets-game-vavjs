@@ -236,6 +236,7 @@ function registerPageLogic() {
 
 function watchPageLogic() {
   console.log('watch game with token:', gameWatchToken);
+  game('watcher', gameWatchToken);
 }
 
 function gamePageLogic() {
@@ -335,7 +336,8 @@ function gamePageLogic() {
     });
   });
 
-  game();
+  window.addEventListener('keydown', handleKeyInput);
+  game('player', getUserToken());
   updateStatistics();
 }
 
@@ -364,9 +366,7 @@ function handleKeyInput(ev) {
   else if (ev.code === 'Space') addLaser();
 }
 
-function game() {
-  window.addEventListener('keydown', handleKeyInput);
-
+function game(type, token) {
   const CELLSIZE = 10;
 
   const canvas = document.getElementById('game');
@@ -496,7 +496,11 @@ function game() {
     scoreElement.innerText = `Score: ${score}`;
   }
 
-  const ws = new WebSocket('ws://localhost:8082', getUserToken());
+  const ws = new WebSocket('ws://localhost:8082');
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ type, token }));
+  };
 
   ws.addEventListener('message', (event) => {
     const data = JSON.parse(event.data);

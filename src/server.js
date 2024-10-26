@@ -164,19 +164,29 @@ app.get('/api/games', (req, res) => {
 });
 
 wss.on('connection', function connection(ws) {
-  console.log(`WebSocket connected: ${ws.protocol}`);
+  let token = null;
 
-  const userToken = ws.protocol;
-  if (!games.has(userToken)) {
-    const user = auth.getUser(userToken);
-    games.set(userToken, new Game(ws, user));
-  } else {
-    games.get(userToken).updateWs(ws);
-  }
+  ws.on('message', (message) => {
+    const data = JSON.parse(message);
+    token = data.token;
+    const type = data.type;
+
+    if (type === 'watcher') {
+      if (games.has(token)) {
+        games.get(token).setWathchersWS(ws);
+      }
+    } else {
+      if (!games.has(token)) {
+        const user = auth.getUser(token);
+        games.set(token, new Game(ws, user));
+      } else {
+        games.get(token).updateWs(ws);
+      }
+    }
+  });
 
   ws.on('close', () => {
     console.log(`WebSocket closed ${ws.protocol}`);
-    games.get(userToken).updateWs(null);
   });
 
   ws.on('error', (err) => {

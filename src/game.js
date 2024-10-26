@@ -16,6 +16,7 @@ function random(min, max) {
 export default class Game {
   constructor(ws, user) {
     this.ws = ws;
+    this.watchersWs = [];
     this.user = user;
 
     if (this.user) {
@@ -273,6 +274,20 @@ export default class Game {
   }
 
   sendGameState() {
+    this.watchersWs.forEach((ws) => {
+      ws.send(
+        JSON.stringify({
+          xShip: this.xShip,
+          yShip: this.yShip,
+          rShip: this.rShip,
+          missiles: this.missiles,
+          lasers: this.lasers,
+          score: this.score,
+          speed: this.speed,
+        }),
+      );
+    });
+
     if (!this.ws) return;
     this.ws.send(
       JSON.stringify({
@@ -287,8 +302,15 @@ export default class Game {
     );
   }
 
+  setWathchersWS(ws) {
+    this.watchersWs.push(ws);
+  }
+
+  deleteWatcherWS(ws) {
+    this.watchersWs = this.watchersWs.filter((w) => w !== ws);
+  }
+
   updateWs(ws) {
-    console.log('Updating ws');
     this.ws = ws;
     this.sendGameState();
   }
