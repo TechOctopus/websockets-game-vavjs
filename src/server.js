@@ -117,6 +117,17 @@ app.post('/api/laser', (req, res) => {
   res.status(200).send({ status: 'ok' });
 });
 
+app.post('/api/ship', (req, res) => {
+  const userToken = req.headers.authorization;
+  const shipVariant = req.body.shipVariant;
+
+  if (!auth.updateShipVariant(userToken, shipVariant)) {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+
+  res.status(200).send({ status: 'ok' });
+});
+
 app.post('/api/restart', (req, res) => {
   const userID = req.headers.authorization;
   if (games.has(userID)) games.get(userID).restart();

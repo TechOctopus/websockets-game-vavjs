@@ -35,6 +35,18 @@ class Auth {
   getUser(token) {
     return this.users.get(token);
   }
+
+  updateShipVariant(userToken, shipVariant) {
+    const user = this.users.get(userToken);
+    if (!user) {
+      return false;
+    }
+
+    store.setShipVariant(user, shipVariant);
+    this.users.set(userToken, { ...user, shipVariant });
+
+    return true;
+  }
 }
 
 export const auth = new Auth();

@@ -6,6 +6,9 @@ const mid = {
   y: Math.floor(yFields / 2),
 };
 
+const shipVariants = ['white', 'orange', 'purple'];
+let shipVariant = 'white';
+
 const rootElement = document.body;
 
 function removeUserToken() {
@@ -236,6 +239,8 @@ function gamePageLogic() {
         return;
       }
 
+      shipVariant = user.shipVariant;
+
       const logoutBtnElement = document.createElement('button');
       logoutBtnElement.innerText = 'Logout';
       logoutBtnElement.addEventListener('click', async () => {
@@ -253,6 +258,27 @@ function gamePageLogic() {
       userElement.appendChild(logoutBtnElement);
       userElement.appendChild(newUserElement);
 
+      console.log(shipVariant);
+
+      const selectShipVariantElement = document.createElement('select');
+      selectShipVariantElement.addEventListener('change', (event) => {
+        shipVariant = event.target.value;
+        console.log(shipVariant);
+        api('api/ship', 'POST', { shipVariant });
+      });
+
+      shipVariants.forEach((shipVariantOption) => {
+        const optionElement = document.createElement('option');
+        if (shipVariant === shipVariantOption) {
+          optionElement.selected = true;
+        }
+        optionElement.value = shipVariantOption;
+        optionElement.innerText = `${shipVariantOption} ship`;
+        selectShipVariantElement.appendChild(optionElement);
+      });
+
+      userElement.appendChild(selectShipVariantElement);
+
       if (user.login === 'admin') {
         const adminLinkElement = document.createElement('button');
         adminLinkElement.innerText = 'Admin';
@@ -260,6 +286,7 @@ function gamePageLogic() {
           switchPage('admin');
         });
 
+        userElement.appendChild(document.createElement('br'));
         userElement.appendChild(adminLinkElement);
       }
     })
@@ -320,14 +347,31 @@ function game() {
   let score = 0;
   let speed = 1000;
 
-  const spaceShipImage = new Image();
+  const spaceShipImages = new Map();
+
   const asteroidImage = new Image();
   const snowBallImage = new Image();
 
+  const whiteSpaceShipImage = new Image();
   // Source: https://opengameart.org/content/spaceship-1
   // License(s): http://www.gnu.org/licenses/gpl-3.0.html
-  spaceShipImage.src =
+  whiteSpaceShipImage.src =
     'https://opengameart.org/sites/default/files/styles/medium/public/pitrizzo-SpaceShip-gpl3-opengameart-24x24-prev.png';
+  spaceShipImages.set('white', whiteSpaceShipImage);
+
+  const orangeSpaceShipImage = new Image();
+  // Source: https://opengameart.org/content/asteroids-game-sprites-atlas
+  // License(s): CC0 1.0 Universal
+  orangeSpaceShipImage.src =
+    'https://opengameart.org/sites/default/files/styles/medium/public/Preview_1.gif';
+  spaceShipImages.set('orange', orangeSpaceShipImage);
+
+  const purpleSpaceShipImage = new Image();
+  // Source: https://opengameart.org/content/purple-space-ship
+  // License(s): CC0 1.0 Universal
+  purpleSpaceShipImage.src =
+    'https://opengameart.org/sites/default/files/styles/medium/public/DurrrSpaceShip_0.png';
+  spaceShipImages.set('purple', purpleSpaceShipImage);
 
   // Source: https://opengameart.org/content/brown-asteroid
   // License(s): CC-BY 4.0, CC-BY 3.0, CC-BY-SA 4.0, CC-BY-SA 3.0
@@ -343,8 +387,24 @@ function game() {
   const shipMargin = 2;
 
   function displayShip() {
+    const image = spaceShipImages.get(shipVariant);
+
+    // cheak if image is loaded
+    if (!image.complete) {
+      image.onload = () => {
+        drawRotatedImage(
+          image,
+          xShip * CELLSIZE - CELLSIZE,
+          yShip * CELLSIZE - CELLSIZE,
+          shipCells * CELLSIZE,
+          shipCells * CELLSIZE,
+          (rShip % 8) * 45,
+        );
+      };
+    }
+
     drawRotatedImage(
-      spaceShipImage,
+      image,
       xShip * CELLSIZE - CELLSIZE,
       yShip * CELLSIZE - CELLSIZE,
       shipCells * CELLSIZE,
@@ -353,7 +413,7 @@ function game() {
     );
   }
 
-  spaceShipImage.onload = () => displayShip();
+  displayShip();
 
   function displayMissiles() {
     missiles.forEach((missile) => {

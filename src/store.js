@@ -29,19 +29,8 @@ const MAX_SPEED_FIELD = index++;
 
 class Store {
   constructor() {
-    this.users = this.init();
-  }
-
-  init() {
-    return [
-      {
-        login: 'admin',
-        email: 'admin@gmail.com',
-        password: hash('admin'),
-        maxScore: 'none',
-        maxSpeed: 'none',
-      },
-    ];
+    this.users = [];
+    this.createUser('admin', 'admin@mail.com', 'admin');
   }
 
   readAndParseCSV() {
@@ -50,20 +39,23 @@ class Store {
       .split('\n')
       .map((line) => line.split(','))
       .filter((line) => line.length > 1)
-      .map((line) => {
-        return {
-          login: line[LOGIN_FIELD],
-          email: line[EMAIL_FIELD],
-          password: line[PASSWORD_FIELD],
-          maxScore: line[MAX_SCORE_FIELD],
-          maxSpeed: line[MAX_SPEED_FIELD],
-        };
-      });
+      .map((line) =>
+        this.createUser(
+          line[LOGIN_FIELD],
+          line[EMAIL_FIELD],
+          line[PASSWORD_FIELD],
+          line[MAX_SCORE_FIELD],
+          line[MAX_SPEED_FIELD],
+        ),
+      );
   }
 
   saveCSV() {
     const dataToSave = this.users
-      .map((user) => Object.values(user).join(','))
+      .map(
+        (user) =>
+          `${user.login},${user.email},${user.password},${user.maxScore},${user.maxSpeed}`,
+      )
       .join('\n');
     fs.writeFileSync(CSV_FILE, dataToSave);
   }
@@ -75,12 +67,15 @@ class Store {
       return isPasswordsMatch && isLoginMatch;
     });
 
+    console.log('user', user);
+
     return user
       ? {
           login: user.login,
           email: user.email,
           maxScore: user.maxScore,
           maxSpeed: user.maxSpeed,
+          shipVariant: user.shipVariant,
         }
       : undefined;
   }
@@ -93,7 +88,14 @@ class Store {
     return this.users.some((user) => user.email === email);
   }
 
-  createUser(login, email, password, maxScore = 'none', maxSpeed = 'none') {
+  createUser(
+    login,
+    email,
+    password,
+    maxScore = 'none',
+    maxSpeed = 'none',
+    shipVariant = 'white',
+  ) {
     if (this.isLoginExist(login) || this.isEmailExist(email)) {
       return false;
     }
@@ -104,6 +106,7 @@ class Store {
       password: hash(password),
       maxScore,
       maxSpeed,
+      shipVariant,
     });
 
     return true;
@@ -127,6 +130,14 @@ class Store {
     this.users.forEach((user) => {
       if (user.login === userToUpdate.login) {
         user.maxSpeed = maxSpeed;
+      }
+    });
+  }
+
+  setShipVariant(userToUpdate, shipVariant) {
+    this.users.forEach((user) => {
+      if (user.login === userToUpdate.login) {
+        user.shipVariant = shipVariant;
       }
     });
   }

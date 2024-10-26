@@ -5,3 +5,4 @@
 - [x] if clietn disconetcted, game not sponig
 
 // Send game statistics over http
+// Can upload onlu with hashed password
