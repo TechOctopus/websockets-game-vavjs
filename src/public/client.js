@@ -83,6 +83,8 @@ function renderTag(data) {
   if (data.innerText) tag.innerText = data.innerText;
   if (data.maxLength) tag.maxLength = data.maxLength;
   if (data.minLength) tag.minLength = data.minLength;
+  if (data.for) tag.for = data.for;
+  if (data.accept) tag.accept = data.accept;
   if (data.innerHtml) {
     data.innerHtml.forEach((element) => {
       tag.appendChild(renderTag(element));
@@ -170,6 +172,26 @@ function adminPageLogic() {
     .catch((error) => {
       console.error(error);
     });
+
+  const exportButtonElement = document.getElementById('export');
+  exportButtonElement.addEventListener('click', async () => {
+    const csv = await api('api/export');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'users.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  const importElement = document.getElementById('import');
+  importElement.addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    const data = await file.text();
+    api('api/import', 'POST', { data });
+    switchPage('admin');
+  });
 }
 
 function loginPageLogic() {
@@ -235,7 +257,6 @@ function registerPageLogic() {
 }
 
 function watchPageLogic() {
-  console.log('watch game with token:', gameWatchToken);
   game('watcher', gameWatchToken);
 }
 
@@ -269,12 +290,9 @@ function gamePageLogic() {
       userElement.appendChild(logoutBtnElement);
       userElement.appendChild(newUserElement);
 
-      console.log(shipVariant);
-
       const selectShipVariantElement = document.createElement('select');
       selectShipVariantElement.addEventListener('change', (event) => {
         shipVariant = event.target.value;
-        console.log(shipVariant);
         api('api/ship', 'POST', { shipVariant });
       });
 

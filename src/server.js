@@ -16,7 +16,7 @@ const wss = new WebSocketServer({ port: WS_PORT });
 const games = new Map();
 
 app.use((req, res, next) => {
-  console.log(`Request: ${req.method} ${req.url}`);
+  console.debug(`Request: ${req.method} ${req.url}`);
   next();
 });
 
@@ -163,6 +163,27 @@ app.get('/api/games', (req, res) => {
   res.json(usersTokens);
 });
 
+app.get('/api/export', (req, res) => {
+  const token = req.headers.authorization;
+  const user = auth.getUser(token);
+  if (!user || user.login !== 'admin') {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+
+  res.json(store.export());
+});
+
+app.post('/api/import', (req, res) => {
+  const token = req.headers.authorization;
+  const user = auth.getUser(token);
+  if (!user || user.login !== 'admin') {
+    return res.status(401).send({ error: 'Invalid token' });
+  }
+
+  store.import(req.body.data);
+  res.status(200).send({ status: 'ok' });
+});
+
 wss.on('connection', function connection(ws) {
   let token = null;
 
@@ -186,7 +207,7 @@ wss.on('connection', function connection(ws) {
   });
 
   ws.on('close', () => {
-    console.log(`WebSocket closed ${ws.protocol}`);
+    console.debug(`WebSocket closed ${ws.protocol}`);
   });
 
   ws.on('error', (err) => {
@@ -195,5 +216,5 @@ wss.on('connection', function connection(ws) {
 });
 
 app.listen(HTTP_PORT, () => {
-  console.log(`Server running at http://localhost:${HTTP_PORT}/`);
+  console.debug(`Server running at http://localhost:${HTTP_PORT}/`);
 });

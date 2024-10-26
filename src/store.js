@@ -17,8 +17,6 @@ function verify(password, hash) {
 }
 // -----------------------------------------------
 
-const CSV_FILE = 'src/data.csv';
-
 // Structure of the CSV file:
 let index = 0;
 const LOGIN_FIELD = index++;
@@ -33,31 +31,30 @@ class Store {
     this.createUser('admin', 'admin@mail.com', 'admin');
   }
 
-  readAndParseCSV() {
-    const dataFromFile = fs.readFileSync(CSV_FILE, 'utf8');
-    return dataFromFile
+  import(data) {
+    this.users = data
       .split('\n')
       .map((line) => line.split(','))
       .filter((line) => line.length > 1)
-      .map((line) =>
-        this.createUser(
-          line[LOGIN_FIELD],
-          line[EMAIL_FIELD],
-          line[PASSWORD_FIELD],
-          line[MAX_SCORE_FIELD],
-          line[MAX_SPEED_FIELD],
-        ),
-      );
+      .map((line) => {
+        return {
+          login: line[LOGIN_FIELD],
+          email: line[EMAIL_FIELD],
+          password: line[PASSWORD_FIELD],
+          maxScore: line[MAX_SCORE_FIELD],
+          maxSpeed: line[MAX_SPEED_FIELD],
+          shipVariant: 'white',
+        };
+      });
   }
 
-  saveCSV() {
-    const dataToSave = this.users
+  export() {
+    return this.users
       .map(
         (user) =>
           `${user.login},${user.email},${user.password},${user.maxScore},${user.maxSpeed}`,
       )
       .join('\n');
-    fs.writeFileSync(CSV_FILE, dataToSave);
   }
 
   getUser(login, password) {
@@ -66,8 +63,6 @@ class Store {
       const isLoginMatch = login === user.login;
       return isPasswordsMatch && isLoginMatch;
     });
-
-    console.log('user', user);
 
     return user
       ? {

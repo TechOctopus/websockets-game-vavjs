@@ -224,40 +224,64 @@ const register = [
 
 const admin = [
   {
-    tag: 'h1',
-    innerText: 'Admin',
-  },
-  {
-    tag: 'link',
-    to: 'home',
-    innerText: 'Game',
-  },
-  {
-    tag: 'table',
-    id: 'users-table',
+    tag: 'section',
     innerHtml: [
       {
-        tag: 'tr',
+        tag: 'h1',
+        innerText: 'Admin',
+      },
+      {
+        tag: 'link',
+        to: 'home',
+        innerText: 'Game',
+      },
+      { tag: 'br' },
+      {
+        tag: 'button',
+        id: 'export',
+        innerText: 'Export to CSV',
+      },
+      { tag: 'br' },
+      {
+        tag: 'label',
+        innerText: 'Import from CSV',
+        for: 'import',
+      },
+      {
+        tag: 'input',
+        name: 'import',
+        id: 'import',
+        type: 'file',
+        accept: '.csv',
+      },
+      {
+        tag: 'table',
+        id: 'users-table',
         innerHtml: [
           {
-            tag: 'th',
-            innerText: 'Login',
-          },
-          {
-            tag: 'th',
-            innerText: 'Email',
-          },
-          {
-            tag: 'th',
-            innerText: 'Score',
-          },
-          {
-            tag: 'th',
-            innerText: 'Speed',
-          },
-          {
-            tag: 'th',
-            innerText: 'Action',
+            tag: 'tr',
+            innerHtml: [
+              {
+                tag: 'th',
+                innerText: 'Login',
+              },
+              {
+                tag: 'th',
+                innerText: 'Email',
+              },
+              {
+                tag: 'th',
+                innerText: 'Score',
+              },
+              {
+                tag: 'th',
+                innerText: 'Speed',
+              },
+              {
+                tag: 'th',
+                innerText: 'Action',
+              },
+            ],
           },
         ],
       },
@@ -279,6 +303,16 @@ const watch = [
       {
         tag: 'h1',
         innerText: 'Watch',
+      },
+      {
+        tag: 'p',
+        id: 'score',
+        innerText: 'Score: 0',
+      },
+      {
+        tag: 'p',
+        id: 'speed',
+        innerText: 'Speed: 1000',
       },
       {
         tag: 'canvas',

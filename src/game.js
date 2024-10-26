@@ -234,7 +234,6 @@ export default class Game {
       this.maxSpeed = this.speed;
     }
 
-    console.log('Game Over');
     clearInterval(this.ival);
     this.ival = null;
   }
