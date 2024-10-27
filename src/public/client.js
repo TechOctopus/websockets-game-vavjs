@@ -1,13 +1,6 @@
 // Heorhi Davydau
 import { v4 as uuidv4 } from 'https://cdn.jsdelivr.net/npm/uuid@10.0.0/+esm';
 
-const xFields = 59;
-const yFields = 59;
-const mid = {
-  x: Math.floor(xFields / 2),
-  y: Math.floor(yFields / 2),
-};
-
 const shipVariants = ['white', 'orange', 'purple'];
 let shipVariant = 'white';
 let gameWatchToken = undefined;
@@ -102,20 +95,20 @@ function renderTag(data) {
   return tag;
 }
 
-async function renderPage(page) {
-  await api(`page/${page}`).then((data) => {
+async function renderPage(pageName) {
+  await api(`page/${pageName}`).then((pageData) => {
     rootElement.innerHTML = '';
-    data.forEach((element) => {
+    pageData.forEach((element) => {
       rootElement.appendChild(renderTag(element));
     });
   });
 }
 
-async function switchPage(page = 'home') {
-  await renderPage(page);
+async function switchPage(pageName = 'game') {
+  await renderPage(pageName);
   window.removeEventListener('keydown', handleKeyInput);
 
-  switch (page) {
+  switch (pageName) {
     case 'admin':
       adminPageLogic();
       break;
@@ -128,7 +121,7 @@ async function switchPage(page = 'home') {
     case 'watch':
       watchPageLogic();
       break;
-    case 'home':
+    case 'game':
       gamePageLogic();
       break;
     default:
@@ -218,7 +211,7 @@ function loginPageLogic() {
     api('api/login', 'POST', { login, password })
       .then((responce) => {
         setUserToken(responce.token);
-        switchPage('home');
+        switchPage('game');
       })
       .catch((error) => {
         errorElement.innerText = error.message;
@@ -257,7 +250,7 @@ function registerPageLogic() {
     api('api/register', 'POST', { login, email, password, confirmPassword })
       .then((responce) => {
         setUserToken(responce.token);
-        switchPage('home');
+        switchPage('game');
       })
       .catch((error) => {
         errorElement.innerText = 'Something went wrong';
@@ -266,105 +259,17 @@ function registerPageLogic() {
 }
 
 function watchPageLogic() {
-  game('watcher', gameWatchToken);
+  renderGame('watcher', gameWatchToken);
 }
 
 function gamePageLogic() {
-  const userElement = document.getElementById('user');
-
-  api('api/auth')
-    .then((responce) => {
-      const user = responce.user;
-
-      if (!user) {
-        return;
-      }
-
-      shipVariant = user.shipVariant;
-
-      const logoutBtnElement = document.createElement('button');
-      logoutBtnElement.innerText = 'Logout';
-      logoutBtnElement.addEventListener('click', async () => {
-        api('api/logout');
-        removeUserToken();
-        switchPage('login');
-      });
-
-      const newUserElement = document.createElement('p');
-      newUserElement.innerText = `
-        User: ${user.login}
-      `;
-
-      userElement.innerHTML = '';
-      userElement.appendChild(logoutBtnElement);
-      userElement.appendChild(newUserElement);
-
-      const selectShipVariantElement = document.createElement('select');
-      selectShipVariantElement.addEventListener('change', (event) => {
-        shipVariant = event.target.value;
-        api('api/ship', 'POST', { shipVariant });
-      });
-
-      shipVariants.forEach((shipVariantOption) => {
-        const optionElement = document.createElement('option');
-        if (shipVariant === shipVariantOption) {
-          optionElement.selected = true;
-        }
-        optionElement.value = shipVariantOption;
-        optionElement.innerText = `${shipVariantOption} ship`;
-        selectShipVariantElement.appendChild(optionElement);
-      });
-
-      userElement.appendChild(selectShipVariantElement);
-
-      if (user.login === 'admin') {
-        const adminLinkElement = document.createElement('button');
-        adminLinkElement.innerText = 'Admin';
-        adminLinkElement.addEventListener('click', async () => {
-          switchPage('admin');
-        });
-
-        userElement.appendChild(document.createElement('br'));
-        userElement.appendChild(adminLinkElement);
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-  const restartGameButtonElement = document.getElementById('restart');
-  restartGameButtonElement.addEventListener('click', () => {
-    api('api/restart', 'POST');
-    updateStatistics();
-  });
-
-  const gamesTableElement = document.getElementById('games-table');
-
-  api('api/games').then((games) => {
-    games.forEach((game) => {
-      const rowElement = document.createElement('tr');
-      const userElement = document.createElement('td');
-      const watchElement = document.createElement('td');
-
-      userElement.innerText = game.user;
-
-      const watchButtonElement = document.createElement('button');
-      watchButtonElement.innerText = 'Watch';
-      watchButtonElement.addEventListener('click', () => {
-        gameWatchToken = game.token;
-        switchPage('watch');
-      });
-      watchElement.appendChild(watchButtonElement);
-
-      rowElement.appendChild(userElement);
-      rowElement.appendChild(watchElement);
-
-      gamesTableElement.appendChild(rowElement);
-    });
-  });
-
   window.addEventListener('keydown', handleKeyInput);
-  game('player', getUserToken());
+  renderGame('player', getUserToken());
+
+  setupGameInfo();
+  setupRestartGameButton();
+  setupGameWatchTable();
+
   updateStatistics();
 }
 
@@ -393,8 +298,15 @@ function handleKeyInput(ev) {
   else if (ev.code === 'Space') addLaser();
 }
 
-function game(type, token) {
+function renderGame(type, token) {
+  const xFields = 59;
+  const yFields = 59;
+  const mid = {
+    x: Math.floor(xFields / 2),
+    y: Math.floor(yFields / 2),
+  };
   const CELLSIZE = 10;
+  const shipCells = 3;
 
   const canvas = document.getElementById('game');
   canvas.width = (xFields - 1) * CELLSIZE;
@@ -444,9 +356,6 @@ function game(type, token) {
   // License(s): CC
   snowBallImage.src =
     'https://opengameart.org/sites/default/files/styles/medium/public/snowball.png';
-
-  const shipCells = 3;
-  const shipMargin = 2;
 
   function displayShip() {
     const image = spaceShipImages.get(shipVariant);
@@ -543,5 +452,118 @@ function game(type, token) {
     displayMissiles();
     displayLasers();
     displayInfo();
+  });
+}
+
+function setupGameInfo() {
+  api('api/auth').then((responce) => {
+    const user = responce.user;
+
+    if (!user) {
+      return;
+    }
+
+    shipVariant = user.shipVariant;
+    setupUserGameInfo(user);
+
+    if (user.login === 'admin') {
+      setupAdminGameInfo();
+    }
+  });
+}
+
+function setupUserGameInfo(user) {
+  const userActionsElement = document.getElementById('user-actions');
+  const userElement = document.getElementById('user');
+
+  // Logout button
+  const logoutBtnElement = document.createElement('button');
+  logoutBtnElement.innerText = 'Logout';
+  logoutBtnElement.addEventListener('click', async () => {
+    logoutBtnElement.disabled = true;
+    await api('api/logout').then(() => {
+      removeUserToken();
+      switchPage('login');
+      logoutBtnElement.disabled = false;
+    });
+  });
+
+  userActionsElement.innerHTML = '';
+  userActionsElement.appendChild(logoutBtnElement);
+
+  // User info
+  const newUserElement = document.createElement('p');
+  newUserElement.innerText = `User: ${user.login}`;
+
+  userElement.innerHTML = '';
+  userElement.appendChild(newUserElement);
+
+  // Ship variant select
+  const selectShipVariantElement = document.createElement('select');
+  selectShipVariantElement.addEventListener('change', (event) => {
+    shipVariant = event.target.value;
+    api('api/ship', 'POST', { shipVariant });
+  });
+
+  shipVariants.forEach((shipVariantOption) => {
+    const optionElement = document.createElement('option');
+    if (shipVariant === shipVariantOption) {
+      optionElement.selected = true;
+    }
+    optionElement.value = shipVariantOption;
+    optionElement.innerText = `${shipVariantOption} ship`;
+    selectShipVariantElement.appendChild(optionElement);
+  });
+
+  userElement.appendChild(selectShipVariantElement);
+}
+
+function setupAdminGameInfo() {
+  const userActionsElement = document.getElementById('user-actions');
+
+  const adminLinkElement = document.createElement('button');
+  adminLinkElement.innerText = 'Admin dashboard';
+  adminLinkElement.addEventListener('click', () => switchPage('admin'));
+
+  userActionsElement.appendChild(document.createElement('br'));
+  userActionsElement.appendChild(document.createElement('br'));
+  userActionsElement.appendChild(adminLinkElement);
+}
+
+function setupGameWatchTable() {
+  const gamesTableElement = document.getElementById('games-table');
+
+  api('api/games').then((games) => {
+    games.forEach((game) => {
+      const rowElement = document.createElement('tr');
+      const userElement = document.createElement('td');
+      const watchElement = document.createElement('td');
+
+      userElement.innerText = game.user;
+
+      const watchButtonElement = document.createElement('button');
+      watchButtonElement.innerText = 'Watch';
+      watchButtonElement.addEventListener('click', () => {
+        gameWatchToken = game.token;
+        switchPage('watch');
+      });
+      watchElement.appendChild(watchButtonElement);
+
+      rowElement.appendChild(userElement);
+      rowElement.appendChild(watchElement);
+
+      gamesTableElement.appendChild(rowElement);
+    });
+  });
+}
+
+function setupRestartGameButton() {
+  const restartGameButtonElement = document.getElementById('restart');
+  restartGameButtonElement.addEventListener('click', async () => {
+    restartGameButtonElement.disabled = true;
+    await api('api/restart', 'POST').then(() => {
+      updateStatistics();
+      restartGameButtonElement.disabled = false;
+    });
   });
 }

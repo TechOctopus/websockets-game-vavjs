@@ -2,13 +2,20 @@
 import { Router } from 'express';
 import { auth } from './auth.js';
 
-const index = [
+const game = [
+  {
+    tag: 'style',
+    innerText: `
+      table { border: 1px dashed;}
+      th, td { border: 1px solid; padding: 0.5rem; }
+    `,
+  },
   {
     tag: 'section',
     innerHtml: [
       {
         tag: 'div',
-        id: 'user',
+        id: 'user-actions',
         innerHtml: [
           {
             tag: 'link',
@@ -24,6 +31,13 @@ const index = [
             innerText: 'Register',
           },
         ],
+      },
+      {
+        tag: 'hr',
+      },
+      {
+        tag: 'div',
+        id: 'user',
       },
       {
         tag: 'p',
@@ -46,6 +60,10 @@ const index = [
         innerText: 'Max speed: 1000',
       },
       {
+        tag: 'h2',
+        innerText: 'Game',
+      },
+      {
         tag: 'canvas',
         width: '580',
         height: '580',
@@ -64,6 +82,13 @@ const index = [
         ],
       },
       {
+        tag: 'hr',
+      },
+      {
+        tag: 'h2',
+        innerText: 'Games to watch',
+      },
+      {
         tag: 'table',
         id: 'games-table',
         innerHtml: [
@@ -76,7 +101,7 @@ const index = [
               },
               {
                 tag: 'th',
-                innerText: 'Online',
+                innerText: 'Action',
               },
             ],
           },
@@ -138,7 +163,7 @@ const login = [
       },
       {
         tag: 'link',
-        href: 'home',
+        to: 'game',
         innerText: 'Play without registration',
       },
     ],
@@ -215,7 +240,7 @@ const register = [
       },
       {
         tag: 'link',
-        href: 'home',
+        to: 'game',
         innerText: 'Play without registration',
       },
     ],
@@ -224,23 +249,32 @@ const register = [
 
 const admin = [
   {
+    tag: 'style',
+    innerText: `
+      table { border: 1px dashed;}
+      th, td { border: 1px solid; padding: 0.5rem; }
+    `,
+  },
+  {
     tag: 'section',
     innerHtml: [
       {
         tag: 'h1',
-        innerText: 'Admin',
+        innerText: 'Admin dashboard',
       },
       {
         tag: 'link',
-        to: 'home',
-        innerText: 'Game',
+        to: 'game',
+        innerText: 'Back to game',
       },
       { tag: 'br' },
+      { tag: 'hr' },
       {
         tag: 'button',
         id: 'export',
         innerText: 'Export to CSV',
       },
+      { tag: 'br' },
       { tag: 'br' },
       {
         tag: 'label',
@@ -253,6 +287,11 @@ const admin = [
         id: 'import',
         type: 'file',
         accept: '.csv',
+      },
+      { tag: 'hr' },
+      {
+        tag: 'h1',
+        innerText: 'Users',
       },
       {
         tag: 'table',
@@ -324,8 +363,8 @@ const watch = [
       { tag: 'br' },
       {
         tag: 'link',
-        to: 'home',
-        innerText: 'Game',
+        to: 'game',
+        innerText: 'Back to game',
       },
     ],
   },
@@ -333,8 +372,8 @@ const watch = [
 
 export const pageRouter = Router();
 
-pageRouter.get('/home', (req, res) => {
-  res.json(index);
+pageRouter.get('/game', (req, res) => {
+  res.json(game);
 });
 
 pageRouter.get('/login', (req, res) => {

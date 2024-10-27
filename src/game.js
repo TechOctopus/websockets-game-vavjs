@@ -269,7 +269,7 @@ export default class Game {
     clearInterval(this.ival);
     this.init();
     this.sendGameState();
-    this.preGame();
+    this.startGame();
   }
 
   sendGameState() {
@@ -303,6 +303,7 @@ export default class Game {
 
   setWathchersWS(ws) {
     this.watchersWs.push(ws);
+    this.sendGameState();
   }
 
   deleteWatcherWS(ws) {

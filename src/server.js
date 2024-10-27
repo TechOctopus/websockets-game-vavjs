@@ -33,10 +33,14 @@ app.get('/api/auth', (req, res) => {
 app.get('/api/logout', (req, res) => {
   const token = req.headers.authorization;
   auth.logout(token);
+  games.delete(token);
   res.status(200).send({ status: 'ok' });
 });
 
 app.post('/api/login', (req, res) => {
+  const oldToken = req.headers.authorization;
+  games.delete(oldToken);
+
   const password = req.body.password;
   const login = req.body.login;
 
@@ -155,7 +159,7 @@ app.get('/api/games', (req, res) => {
   const usersTokens = tokens.map((token) => {
     const user = auth.getUser(token);
     return {
-      user: user ? user.login : 'null',
+      user: user ? user.login : 'not logged in',
       token,
     };
   });
@@ -207,7 +211,7 @@ wss.on('connection', function connection(ws) {
   });
 
   ws.on('close', () => {
-    console.debug(`WebSocket closed ${ws.protocol}`);
+    console.debug(`WebSocket closed`);
   });
 
   ws.on('error', (err) => {

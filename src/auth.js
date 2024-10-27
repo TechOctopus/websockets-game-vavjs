@@ -14,8 +14,6 @@ class Auth {
       return undefined;
     }
 
-    // TODO: cheak is not already logged in other device, if yes retrun error and say to user to logout from other device
-
     const newToken = uuidv4();
     this.users.set(newToken, user);
     return newToken;
