@@ -1,8 +1,6 @@
 // Heorhi Davydau
 import { v4 as uuidv4 } from 'https://cdn.jsdelivr.net/npm/uuid@10.0.0/+esm';
 
-const shipVariants = ['white', 'orange', 'purple'];
-let shipVariant = 'white';
 let gameWatchToken = undefined;
 
 const rootElement = document.body;
@@ -57,13 +55,7 @@ function renderTag(data) {
   // Special case for links to switch pages
   if (data.tag === 'link') {
     const link = document.createElement('button');
-    link.style = `
-      background: none;
-      border: none;
-      color: blue;
-      cursor: pointer;
-      text-decoration: underline;
-    `;
+    link.classList.add('link');
     link.addEventListener('click', async () => await switchPage(data.to));
     link.innerText = data.innerText;
     return link;
@@ -259,15 +251,20 @@ function registerPageLogic() {
 }
 
 function watchPageLogic() {
-  renderGame('watcher', gameWatchToken);
+  game('watcher', gameWatchToken, { variant: 'white' });
 }
 
 function gamePageLogic() {
   window.addEventListener('keydown', handleKeyInput);
-  renderGame('player', getUserToken());
 
-  setupGameInfo();
+  const ship = {
+    variant: 'white',
+  };
+
+  setupGameInfo(ship);
   setupRestartGameButton();
+
+  game('player', getUserToken(), ship);
   setupGameWatchTable();
 
   updateStatistics();
@@ -298,7 +295,7 @@ function handleKeyInput(ev) {
   else if (ev.code === 'Space') addLaser();
 }
 
-function renderGame(type, token) {
+function game(type, token, ship) {
   const xFields = 59;
   const yFields = 59;
   const mid = {
@@ -358,7 +355,7 @@ function renderGame(type, token) {
     'https://opengameart.org/sites/default/files/styles/medium/public/snowball.png';
 
   function displayShip() {
-    const image = spaceShipImages.get(shipVariant);
+    const image = spaceShipImages.get(ship.variant);
 
     // cheak if image is loaded
     if (!image.complete) {
@@ -455,7 +452,7 @@ function renderGame(type, token) {
   });
 }
 
-function setupGameInfo() {
+function setupGameInfo(ship) {
   api('api/auth').then((responce) => {
     const user = responce.user;
 
@@ -463,8 +460,8 @@ function setupGameInfo() {
       return;
     }
 
-    shipVariant = user.shipVariant;
-    setupUserGameInfo(user);
+    ship.variant = user.shipVariant;
+    setupUserGameInfo(user, ship);
 
     if (user.login === 'admin') {
       setupAdminGameInfo();
@@ -472,7 +469,7 @@ function setupGameInfo() {
   });
 }
 
-function setupUserGameInfo(user) {
+function setupUserGameInfo(user, ship) {
   const userActionsElement = document.getElementById('user-actions');
   const userElement = document.getElementById('user');
 
@@ -499,15 +496,17 @@ function setupUserGameInfo(user) {
   userElement.appendChild(newUserElement);
 
   // Ship variant select
+  const shipVariants = ['white', 'orange', 'purple'];
+
   const selectShipVariantElement = document.createElement('select');
   selectShipVariantElement.addEventListener('change', (event) => {
-    shipVariant = event.target.value;
-    api('api/ship', 'POST', { shipVariant });
+    ship.variant = event.target.value;
+    api('api/ship', 'POST', { shipVariant: event.target.value });
   });
 
   shipVariants.forEach((shipVariantOption) => {
     const optionElement = document.createElement('option');
-    if (shipVariant === shipVariantOption) {
+    if (ship.variant === shipVariantOption) {
       optionElement.selected = true;
     }
     optionElement.value = shipVariantOption;

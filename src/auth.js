@@ -45,6 +45,15 @@ class Auth {
 
     return true;
   }
+
+  getShipVariant(userToken) {
+    const user = this.users.get(userToken);
+    if (!user) {
+      return 'white';
+    }
+
+    return user.shipVariant;
+  }
 }
 
 export const auth = new Auth();

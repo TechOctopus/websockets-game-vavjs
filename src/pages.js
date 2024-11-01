@@ -2,13 +2,25 @@
 import { Router } from 'express';
 import { auth } from './auth.js';
 
+const globalCss = `
+  table { border: 1px dashed;}
+  th, td { border: 1px solid; padding: 0.5rem; }
+  .link {
+    background: none;
+    border: none;
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  .link:hover { text-decoration: none; color: darkblue; }
+  .link::before { content: '> '; }
+  canvas { border: 2px solid black; }
+`;
+
 const game = [
   {
     tag: 'style',
-    innerText: `
-      table { border: 1px dashed;}
-      th, td { border: 1px solid; padding: 0.5rem; }
-    `,
+    innerText: globalCss,
   },
   {
     tag: 'section',
@@ -68,7 +80,6 @@ const game = [
         width: '580',
         height: '580',
         id: 'game',
-        style: 'border: 1px solid black;',
       },
       { tag: 'br' },
       {
@@ -112,6 +123,10 @@ const game = [
 ];
 
 const login = [
+  {
+    tag: 'style',
+    innerText: globalCss,
+  },
   {
     tag: 'section',
     style: 'display: grid; place-items: center; gap: 1rem;',
@@ -171,6 +186,10 @@ const login = [
 ];
 
 const register = [
+  {
+    tag: 'style',
+    innerText: globalCss,
+  },
   {
     tag: 'section',
     style: 'display: grid; place-items: center; gap: 1rem;',
@@ -250,10 +269,7 @@ const register = [
 const admin = [
   {
     tag: 'style',
-    innerText: `
-      table { border: 1px dashed;}
-      th, td { border: 1px solid; padding: 0.5rem; }
-    `,
+    innerText: globalCss,
   },
   {
     tag: 'section',
@@ -328,14 +344,11 @@ const admin = [
   },
 ];
 
-const notFound = [
-  {
-    tag: 'p',
-    innerText: '404 Not Found',
-  },
-];
-
 const watch = [
+  {
+    tag: 'style',
+    innerText: globalCss,
+  },
   {
     tag: 'section',
     innerHtml: [
@@ -358,7 +371,6 @@ const watch = [
         width: '580',
         height: '580',
         id: 'game',
-        style: 'border: 1px solid black;',
       },
       { tag: 'br' },
       {
