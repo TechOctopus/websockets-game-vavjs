@@ -61,6 +61,18 @@ function renderTag(data) {
     return link;
   }
 
+  if (data.tag === 'select') {
+    const select = document.createElement('select');
+    select.id = data.id;
+    data.options.forEach((option) => {
+      const optionElement = document.createElement('option');
+      optionElement.value = option.value;
+      optionElement.innerText = option.innerText;
+      select.appendChild(optionElement);
+    });
+    return select;
+  }
+
   const tag = document.createElement(data.tag);
 
   if (data.id) tag.id = data.id;
@@ -254,14 +266,14 @@ function watchPageLogic() {
   game('watcher', gameWatchToken, { variant: 'white' });
 }
 
-function gamePageLogic() {
+async function gamePageLogic() {
   window.addEventListener('keydown', handleKeyInput);
 
   const ship = {
     variant: 'white',
   };
 
-  setupGameInfo(ship);
+  await setupGameInfo(ship);
   setupRestartGameButton();
 
   game('player', getUserToken(), ship);
@@ -452,16 +464,17 @@ function game(type, token, ship) {
   });
 }
 
-function setupGameInfo(ship) {
-  api('api/auth').then((responce) => {
+async function setupGameInfo(ship) {
+  await api('api/auth').then(async (responce) => {
     const user = responce.user;
 
     if (!user) {
+      setupChoiseShipVariant(ship);
       return;
     }
 
     ship.variant = user.shipVariant;
-    setupUserGameInfo(user, ship);
+    await setupUserGameInfo(user);
 
     if (user.login === 'admin') {
       setupAdminGameInfo();
@@ -469,7 +482,7 @@ function setupGameInfo(ship) {
   });
 }
 
-function setupUserGameInfo(user, ship) {
+async function setupUserGameInfo(user) {
   const userActionsElement = document.getElementById('user-actions');
   const userElement = document.getElementById('user');
 
@@ -495,26 +508,17 @@ function setupUserGameInfo(user, ship) {
   userElement.innerHTML = '';
   userElement.appendChild(newUserElement);
 
-  // Ship variant select
-  const shipVariants = ['white', 'orange', 'purple'];
-
-  const selectShipVariantElement = document.createElement('select');
+  const selectShipVariantElement = document.getElementById('ship-variant');
   selectShipVariantElement.addEventListener('change', (event) => {
     ship.variant = event.target.value;
     api('api/ship', 'POST', { shipVariant: event.target.value });
   });
 
-  shipVariants.forEach((shipVariantOption) => {
-    const optionElement = document.createElement('option');
-    if (ship.variant === shipVariantOption) {
-      optionElement.selected = true;
+  Array.from(selectShipVariantElement.options).forEach((option) => {
+    if (option.value === ship.variant) {
+      option.selected = true;
     }
-    optionElement.value = shipVariantOption;
-    optionElement.innerText = `${shipVariantOption} ship`;
-    selectShipVariantElement.appendChild(optionElement);
   });
-
-  userElement.appendChild(selectShipVariantElement);
 }
 
 function setupAdminGameInfo() {
@@ -564,5 +568,18 @@ function setupRestartGameButton() {
       updateStatistics();
       restartGameButtonElement.disabled = false;
     });
+  });
+}
+
+function setupChoiseShipVariant(ship) {
+  const selectShipVariantElement = document.getElementById('ship-variant');
+  selectShipVariantElement.addEventListener('change', (event) => {
+    ship.variant = event.target.value;
+  });
+
+  Array.from(selectShipVariantElement.options).forEach((option) => {
+    if (option.value === ship.variant) {
+      option.selected = true;
+    }
   });
 }

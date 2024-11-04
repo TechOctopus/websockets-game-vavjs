@@ -76,22 +76,35 @@ const game = [
         innerText: 'Game',
       },
       {
-        tag: 'canvas',
-        width: '580',
-        height: '580',
-        id: 'game',
-      },
-      { tag: 'br' },
-      {
         tag: 'div',
+        style: 'display: flex; gap: 1rem;',
         innerHtml: [
           {
             tag: 'button',
             id: 'restart',
             innerText: 'Restart',
           },
+          {
+            tag: 'select',
+            id: 'ship-variant',
+            options: [
+              { value: 'white', innerText: 'White ship' },
+              { value: 'orange', innerText: 'Orange ship' },
+              { value: 'purple', innerText: 'Purple ship' },
+            ],
+          },
         ],
       },
+      {
+        tag: 'br',
+      },
+      {
+        tag: 'canvas',
+        width: '580',
+        height: '580',
+        id: 'game',
+      },
+      { tag: 'br' },
       {
         tag: 'hr',
       },

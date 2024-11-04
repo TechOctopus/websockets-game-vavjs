@@ -1,9 +1,14 @@
 {
+  "author": "Heorhi Davydau",
+  "name": "game",
+  "main": "src/server.js",
   "type": "module",
   "scripts": {
     "dev": "NODE_OPTIONS=--inspect node --watch src/server.js",
     "start": "node src/server.js"
   },
+  "license": "MIT",
+  "description": "Uloha 2 - server game, pre predmet VAVJS",
   "dependencies": {
     "express": "^4.21.1",
     "uuid": "^10.0.0",
