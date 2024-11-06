@@ -278,8 +278,6 @@ async function gamePageLogic() {
 
   game('player', getUserToken(), ship);
   setupGameWatchTable();
-
-  updateStatistics();
 }
 
 // Game logic
@@ -445,6 +443,9 @@ function game(type, token, ship) {
 
   ws.onopen = () => {
     ws.send(JSON.stringify({ type, token }));
+    if (type === 'player') {
+      updateStatistics();
+    }
   };
 
   ws.addEventListener('message', (event) => {
@@ -474,7 +475,7 @@ async function setupGameInfo(ship) {
     }
 
     ship.variant = user.shipVariant;
-    await setupUserGameInfo(user);
+    await setupUserGameInfo(user, ship);
 
     if (user.login === 'admin') {
       setupAdminGameInfo();
@@ -482,7 +483,7 @@ async function setupGameInfo(ship) {
   });
 }
 
-async function setupUserGameInfo(user) {
+async function setupUserGameInfo(user, ship) {
   const userActionsElement = document.getElementById('user-actions');
   const userElement = document.getElementById('user');
 
