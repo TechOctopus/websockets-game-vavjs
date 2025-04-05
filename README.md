@@ -4,7 +4,7 @@
 >
 > You may use this repository for inspiration or reference _after_ you have completed and submitted your own work, or if you are no longer taking the course. **It is crucial that you develop your own solution to understand the concepts and learn effectively.** The best way to learn is by doing the work yourself.
 
-# VAVJS Server-Side Game Project (Zadanie 2)
+# Server-Side Game Project
 
 This project was created as an assignment for the **VAVJS_B (Application Development in JavaScript)** course at the **[FIIT STU](https://www.fiit.stuba.sk/en.html?page_id=749)**.
 
