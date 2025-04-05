@@ -1,115 +1,127 @@
-- ODOVZDAVTE DOCKER-COMPOSE.YML, PACKAGE.JSON, maximalne 7 \*.JS(ON) suborov a INDEX.HTML
-- pripadne odovzdavate DOCKERFILE, .DOCKERIGNORE
-- NEODOVZDAVATE OBRAZKY, NODE_MODULES
-- KAZDY SUBOR MUSI MAT HLAVICKU
-- po "docker-compose build" a "docker-compose up" sa musi vsetko spustit. Spustenie inymi prikazmi nie je mozne a riesenia, ktore budu vyzadovant inu spustaciu sekvenciu ako hore uvedenu budu hodnotene 0b bez ohladu na funkcionalitu.
-- POUZIT MOZETE LEN node:23.0 alebo node:lts. Pouzitie inej verzie nie je mozne a zadania ktore budu vyuzivat inu verziu ako uvedene 2 moznosti budu hodnotene 0b bez ohladu na funkcionalitu.
-- HTTP MUSI KOMUNIKOVAT NA 8080, WS MUSI KOMUNIKOVAT NA 8082, inak zadanie bude hodnotene 0b.
+> [!WARNING]
+>
+> This repository contains a solution for an assignment in the VAVJS course at FIIT STU. If you are currently enrolled in this course or a similar one, please **do not copy** this code or parts of it and submit it as your own work. Submitting plagiarized work can lead to serious academic consequences according to the university's regulations.
+>
+> You may use this repository for inspiration or reference _after_ you have completed and submitted your own work, or if you are no longer taking the course. **It is crucial that you develop your own solution to understand the concepts and learn effectively.** The best way to learn is by doing the work yourself.
 
-Cielom ulohy bude prepisat predoslu hru z client-side verzie na server-side verziu s moznostou manazmentu viacerych hracov.
+# VAVJS Server-Side Game Project (Zadanie 2)
 
-| Cislo | Hotova | Uloha                                                                                                              | Body |
-| ----- | ------ | ------------------------------------------------------------------------------------------------------------------ | ---- |
-| 1     | x      | prepisanie originalnej hry na server-side riesenie                                                                 | 1    |
-| 2     | x      | posielanie stlaceni klaves na server a ich spracovanie na serveri cez http                                         | 1    |
-| 3     | x      | vratenie iba aktualnej plochy hry zo serveru pomocou websocketov a vykreslenie aktualnej plochy cez canvas         | 1    |
-| 4     | x      | moznost vyberu obrazku lode, pamatanie vyberu pre prihlaseneho pouzivatela                                         | 1    |
-| 5     | x      | serverside ukladanie max skore pre prihlaseneho pouzivatela a neprihlaseneho pouzivatela                           | 1    |
-| 6     | x      | vypisovanie aktualneho a najlepsieho skore zo serveru (per user/session)                                           | 1    |
-| 7     | x      | umoznenie viacerych nezavislych hier paralelne (aspon 1000)                                                        | 1    |
-| 8     | x      | na stranke umoznit registraciu a prihlasenie pouzivatelov - e-mail, login, heslo (2x pri registracii)              | 1    |
-| 9     | x      | zdielanie session medzi backendom (server) a frontedom (browser)                                                   | 1    |
-| 10    | x      | admin rozhranie zobrazujuce tabulku registrovanych pouzivatelov s moznostou zmazania pouzivatela (len pre admina)  | 1    |
-| 11    |        | zobrazit zoznam aktualne hranych hier (meno/null) s moznostou sledovania pre vsetkych pouzivatelov                 | 1    |
-| 12    |        | import a export CSV udajov pouzivatelov (meno, email, heslo, max score, max rychlost) len pre pouzivatela "admin"  | 1    |
-| 13    | x      | vyuzitie objektovej reprezentacie struktury stranky                                                                | 1    |
-| 14    | x      | server vracia staticky obsah (index.html, js subory), vsetka ostatna komunikacia (plocha, interakcia) pouziva JSON | 1    |
-| 15    | x      | kontrola vstupov (email, login, heslo)                                                                             | 1    |
+This project was created as an assignment for the **VAVJS_B (Application Development in JavaScript)** course at the **[FIIT STU](https://www.fiit.stuba.sk/en.html?page_id=749)**.
 
-SUM 15
+The goal of this assignment was to refactor the previous client-side game into a full-fledged server-side application using Node.js, Express (recommended), and WebSockets, incorporating features like user authentication, persistent scoring, multi-game management, and an admin interface. The application is designed to be run using Docker.
 
-3. WS
-   WebSockety su urcene iba na posielanie plochy, nic ine. 8082
+## Assignment Goal
 
-4. admin
-   meno: admin
-   heslo: admin
+The main objective is to rewrite the previous client-side game into a server-side version with the capability to manage multiple players and game instances.
 
-5. Inspiracia:
+## Technical Requirements & Constraints
 
-```json
-[
-  {
-    "tag": "div",
-    "id": "id1",
-    "innerTags": [
-      {
-        "tag": "p",
-        "innerText": "Lorem ipsum"
-      },
-      {
-        "tag": "button",
-        "id": "register",
-        "innerText": "Click me"
-      }
-    ]
-  }
-]
+- **Submission Files:**
+  - **Required:** `docker-compose.yml`, `package.json`, `index.html`, max 7 `*.js` or `*.json` files (including server code, server-side game logic, client-side game logic).
+  - **Optional:** `Dockerfile`, `.dockerignore`.
+  - **DO NOT SUBMIT:** Images (`node_modules` will be ignored by `.dockerignore` or should not be included in the archive).
+- **File Headers:** Every submitted file (`.html`, `.js`, `.json`, `Dockerfile`, `.yml`) MUST contain a header comment with the author's name.
+  - HTML: `<!-- Your Name -->`
+  - JS/JSON/Dockerfile/YML: `// Your Name` or `# Your Name` (as appropriate)
+- **Execution:**
+  - The application MUST start correctly using only `docker-compose build` followed by `docker-compose up`.
+  - Solutions requiring any other startup sequence will be graded with 0 points, regardless of functionality.
+- **Environment:**
+  - Only `node:23.0` or `node:lts` base images are allowed in the Docker setup. Using any other Node.js version will result in 0 points.
+- **Networking:**
+  - The HTTP server MUST listen on port `8080`.
+  - The WebSocket (WS) server MUST listen on port `8082`.
+  - Failure to adhere to these ports will result in 0 points.
+- **Communication:**
+  - The server serves static content (`index.html`, JS files).
+  - All other communication (game state updates, interactions) MUST use JSON format.
+  - WebSockets (port 8082) are strictly for sending the current game board state from the server to the client. No other data should be sent over WS.
+  - Key presses are sent from the client to the server via HTTP requests and processed server-side.
+- **Frameworks/Libraries:**
+  - **Recommended:** `Express`
+  - **Required:** `ws`, `fetch` (or native Node fetch)
+  - **Forbidden:** `React`, `Angular`, `Vue`, `socket.io`, `html2json`, and similar high-level frameworks/libraries that abstract core functionalities required by the assignment. If unsure about a library, consult the instructor.
+
+## Detailed Tasks
+
+| No. | Done | Task                                                                                                                 | Points |
+| --- | ---- | -------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1   | x    | Rewriting the original game into a server-side solution                                                              | 1      |
+| 2   | x    | Sending key presses to the server and processing them server-side via HTTP                                           | 1      |
+| 3   | x    | Returning only the current game board from the server via WebSockets and rendering it using Canvas                   | 1      |
+| 4   | x    | Option to select a ship image, remembering the choice for the logged-in user                                         | 1      |
+| 5   | x    | Server-side storage of max score for logged-in and anonymous users                                                   | 1      |
+| 6   | x    | Displaying current and best scores from the server (per user/session)                                                | 1      |
+| 7   | x    | Allowing multiple independent games in parallel (at least 1000)                                                      | 1      |
+| 8   | x    | User registration (email, login, password + confirmation) and login on the page                                      | 1      |
+| 9   | x    | Session sharing between backend (server) and frontend (browser)                                                      | 1      |
+| 10  | x    | Admin interface displaying a table of registered users with the option to delete a user (admin only)                 | 1      |
+| 11  | x    | Displaying a list of currently played games (username/null) with the option for all users to spectate                | 1      |
+| 12  | x    | Import and export of user data (name, email, password, max score, max speed) in CSV format (admin user "admin" only) | 1      |
+| 13  | x    | Using an object-oriented representation for the page structure (inspired by the JSON example)                        | 1      |
+| 14  | x    | Server returns static content; all other communication (board, interaction) uses JSON                                | 1      |
+| 15  | x    | Input validation (email format, login format, password requirements)                                                 | 1      |
+|     |      | **SUM**                                                                                                              | **15** |
+
+## Specific Implementation Details
+
+- **Admin User:** Default credentials are `login: admin`, `password: admin`.
+- **Input Validation:**
+  - **Email:** Must be unique and match a basic format like `string@string.domain` (e.g., `a@b.co`).
+  - **Login:** Must be unique, contain only letters (`[a-zA-Z]`). Anonymous users represented as `"[N/A]"`.
+  - **Password:** Must be stored hashed on the server.
+- **Page Structure Inspiration (Object Representation):**
+  ```json
+  [
+    {
+      "tag": "div",
+      "id": "id1",
+      "innerTags": [
+        {
+          "tag": "p",
+          "innerText": "Lorem ipsum"
+        },
+        {
+          "tag": "button",
+          "id": "register",
+          "innerText": "Click me"
+        }
+      ]
+    }
+  ]
+  ```
+- **Base `index.html` Structure:**
+  ```html
+  <!-- Your Name -->
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <!-- Add other meta tags or links if necessary -->
+      <title>VAVJS Server-Side Game</title>
+      <!-- Example Title -->
+    </head>
+    <body>
+      <!-- Content will be generated by client.js -->
+    </body>
+    <script src="client.js"></script>
+    <!-- Load your client-side script -->
+  </html>
+  ```
+
+## How to Run the Project
+
+```bash
+# Clone the repository
+git clone https://github.com/TechOctopus/websockets-game-vavjs
+cd websockets-game-vavjs
+# Build and run the Docker containers
+docker-compose build
+docker-compose up
+# Access the application in your web browser
+http://localhost:8080
 ```
 
-6. e-mail - unikatny, s overenim tvaru 3@3.2
-   heslo - hashed
-   login - unikatne, iba [a-zA-Z]; nepihlaseny "[N/A]"
+## License
 
-vzor index.html:
-
-```html
-<!-- Roman Bronis -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-  </head>
-  <body></body>
-  <script src="client.js"></script>
-</html>
-```
-
-Odovzdavate zazipovany priecinok s:
-1x JS so server kodom
-1x JS so server-side kodom hry
-1x JS s client-side kodom hry
-max. 1 HTML - index.html (cez server, nie cez file://) kde LEN nacitate svoju client-side kniznicu
-optional: max dokopy 7 JS/JSON suborov
-1x package.json
-1x docker-compose.yml a (pripadne) dockerfile
-
-HTTP server komunikuje na 8080
-WS server komunikuje na 8082
-
-Kazdy subor musi mat hlavicku s menom autora.
-Priklad hlavicky a komentaru:
-html:
-
-```html
-<!-- Roman Bronis -->
-...
-```
-
-js:
-
-```js
-// Roman Bronis
-...
-```
-
-Odporucane frameworky/kniznice:
-Express
-
-Vyzadovane frameworky/kniznice:
-ws, fetch
-
-Zakazane frameworky/kniznice:
-React, Angular, Vue, socket.io, html2json... (ak si nie ste isty, ci ho mozete pouzit, spytajte sa)
-
-Kazdy student zodpoveda za vypracovanie samostatne. V pripade akychkolvek nejasnosti v zadani je povinnostou studenta ich konzultovat s garantom predmetu a to pred odovzdanim do miesta odovzdania. V pripade, ze student objavi nejasnost zadania po odovzdani ma vyucujuci pravo nepridelit body za danu funkcionalitu alebo projekt podla svojho zhodnotenia. (priklad: "...ja som to pochopil tak, ze...")
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
